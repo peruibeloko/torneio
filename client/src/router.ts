@@ -1,4 +1,4 @@
-import { createWebHistory, createRouter } from 'vue-router';
+import { createWebHashHistory, createRouter } from 'vue-router';
 
 import Login from './views/Login.vue';
 import Submit from './views/Submit.vue';
@@ -11,7 +11,7 @@ export enum RouteNames {
 } 
 
 export default createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes: [
     { path: '/', name: RouteNames.LOGIN, component: Login },
     { path: '/submit', name: RouteNames.SUBMIT, component: Submit },

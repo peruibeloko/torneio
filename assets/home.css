@@ -1,0 +1,8 @@
+main {
+  flex-direction: column;
+
+  section {
+    display: flex;
+    align-items: center;
+  }
+}

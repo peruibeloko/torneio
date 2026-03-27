@@ -1,0 +1,35 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: auto;
+  min-width: fit-content;
+  max-width: 60%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+main {
+  display: flex;
+}
+
+div.vbar {
+  margin: 0 2rem;
+  grid-area: vbar;
+  background: black;
+  width: 5px;
+  height: 10rem;
+}
+
+ul,
+ol {
+  list-style: none;
+}

@@ -6,32 +6,22 @@ export interface State {
   shared: string;
 }
 
-export type GameMessage =
-  | {
-    type: "join";
-    code: string;
-  }
-  | {
-    type: "suggest";
-    thing: string;
-  }
-  | {
-    type: "vote";
-    option: number;
-  };
-
 export const define = createDefine<State>();
 
-export const createRoomCode = () => {
-  const ASCII_UPPERCASE_A_OFFSET = 65;
-  const ALPHABET_LENGTH = 26;
+export const collectKv = async <T>(list: Deno.KvListIterator<T>) => {
+  const out = [];
+  const val = await list.next();
+  do {
+    out.push(val.value);
+  } while (!val.done);
+  return out;
+};
 
-  const getRandomChar = () =>
-    ASCII_UPPERCASE_A_OFFSET + Math.floor(Math.random() * ALPHABET_LENGTH);
-
-  const codes = new Array(6)
-    .fill(0) // or else map doesnt work
-    .map(getRandomChar);
-
-  return String.fromCodePoint(...codes);
+export const collect = <T>(iter: IterableIterator<T>) => {
+  const out = [];
+  const val = iter.next();
+  do {
+    out.push(val.value);
+  } while (!val.done);
+  return out;
 };

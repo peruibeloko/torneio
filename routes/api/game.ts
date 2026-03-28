@@ -1,42 +1,21 @@
-import { define, GameMessage } from "@/utils.ts";
+import { handleMessage } from "@/game/comms.ts";
+import { define } from "@/utils.ts";
 
-export const handler = define.handlers((ctx) => {
-  console.log("got request on ws route");
+export const handler = define.handlers({
+  GET: (ctx) => handleRoute(ctx.req),
+});
 
-  if (ctx.req.headers.get("upgrade") !== "websocket") {
+export function handleRoute(req: Request) {
+  if (req.headers.get("upgrade") !== "websocket") {
     return new Response(null, { status: 426 });
   }
 
-  const { socket, response } = Deno.upgradeWebSocket(ctx.req);
-
-  socket.addEventListener("open", () => {
-    console.log("Connected");
-  });
-
-  socket.addEventListener("close", () => {
-    console.log("Disconnected");
-  });
+  const { socket, response } = Deno.upgradeWebSocket(req);
 
   socket.addEventListener("message", ({ data }) => {
-    const gameMessage = data as GameMessage;
-
-    switch (gameMessage.type) {
-      case "join":
-        // join logic
-        break;
-      case "suggest":
-        // suggest logic
-        break;
-      case "vote":
-        // vote logic
-        break;
-      default:
-        console.log("Unsupported message:", gameMessage["type"]);
-        break;
-    }
-
-    socket.send(data);
+    const res = handleMessage(JSON.parse(data), socket);
+    if (res) socket.send(JSON.stringify(res));
   });
 
   return response;
-});
+}

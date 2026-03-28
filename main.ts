@@ -5,3 +5,4 @@ export const app = new App<State>();
 
 app.use(staticFiles());
 app.fsRoutes();
+

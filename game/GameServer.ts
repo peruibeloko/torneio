@@ -1,5 +1,5 @@
 import { InMsg, OutMsg, ServerPlayer, Thing } from "@/game/constants.ts";
-import { ServerLobby } from "./ServerLobby.ts";
+import { ServerLobby } from "@/game/ServerLobby.ts";
 
 type Lobbies = Map<string, ServerLobby>;
 
@@ -33,13 +33,18 @@ export class GameServer {
       return String.fromCodePoint(...codes);
     };
 
-    const lobbyCode = createRoomCode();
+    let lobbyCode = createRoomCode();
+
+    while (this.#lobbies.has(lobbyCode)) {
+      lobbyCode = createRoomCode();
+    }
+
     this.#lobbies.set(lobbyCode, new ServerLobby(lobbyCode));
     return lobbyCode;
   }
 
-  addPlayer(lobbyCode: string, player: ServerPlayer) {
-    this.getLobby(lobbyCode).addPlayer(player);
+  addPlayer(lobbyCode: string, name: string, player: ServerPlayer) {
+    this.getLobby(lobbyCode).addPlayer(name, player);
   }
 
   removePlayer(lobbyCode: string, player: string) {
@@ -77,8 +82,7 @@ export class GameServer {
         break;
 
       case "join":
-        this.addPlayer(msg.data.lobbyCode, {
-          name: msg.data.player,
+        this.addPlayer(msg.data.lobbyCode, msg.data.player, {
           socket,
           ready: false,
         });

@@ -19,11 +19,10 @@ export const KEYS = {
   LOBBY_THINGS: (code: string) => [PARTS.ROOT, PARTS.THINGS, code],
 };
 
-export interface ServerPlayer {
-  name: string;
+export type ServerPlayer = {
   ready: boolean;
   socket: WebSocket;
-}
+};
 
 export interface ClientPlayer {
   name: string;
@@ -32,7 +31,8 @@ export interface ClientPlayer {
 
 export type Thing = string & { [tags]: { "Thing": void } };
 
-export type Votes = { [thing: Thing]: Signal<string[]> };
+export type ClientVotes = { [thing: Thing]: Signal<string[]> };
+export type ServerVotes = { [thing: string]: string[] };
 
 export interface JoinMsg {
   lobbyCode: string;

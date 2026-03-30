@@ -4,7 +4,7 @@ import {
   InMsg,
   OutMsg,
   Thing,
-  Votes,
+  ClientVotes,
 } from "@/game/constants.ts";
 import { computed, signal } from "@preact/signals";
 
@@ -17,7 +17,7 @@ export class GameClient {
   #things = signal<string[]>([]);
 
   #round = signal(0);
-  #votes: Votes = {};
+  #votes: ClientVotes = {};
   #winner = signal("");
   #isGameEnd = signal(false);
   #roundEndCallback = () => {};

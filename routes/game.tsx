@@ -3,7 +3,7 @@ import { GameContext } from "@/routes/_app.tsx";
 import { define } from "@/utils.ts";
 import { useSignal } from "@preact/signals";
 import { useContext, useRef } from "preact/hooks";
-import { Button } from "../components/Button.tsx";
+import { Button } from "@/components/Button.tsx";
 
 export default define.page(function Game(ctx) {
   const client = useContext(GameContext);

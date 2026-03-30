@@ -1,10 +1,9 @@
 import "@/assets/lobby.css";
-import { Button } from "@/islands/Button.tsx";
-import { Input } from "@/islands/Input.tsx";
 import { GameContext } from "@/routes/_app.tsx";
 import { define } from "@/utils.ts";
-import { computed, useSignal } from "@preact/signals";
+import { computed } from "@preact/signals";
 import { useContext } from "preact/hooks";
+import { SuggestionBox } from "@/islands/SuggestionBox.tsx";
 
 export default define.page(function Lobby(ctx) {
   const client = useContext(GameContext);
@@ -22,12 +21,6 @@ export default define.page(function Lobby(ctx) {
       .value
       .map((t) => <li key={t}>{t}</li>)
   );
-
-  const suggestion = useSignal("");
-  const suggest = () => {
-    client.suggest(suggestion.value);
-    suggestion.value = "";
-  };
 
   return (
     <>
@@ -47,16 +40,7 @@ export default define.page(function Lobby(ctx) {
           <div className="vbar"></div>
           <section>
             <h2>Coisas</h2>
-            <div className="inputgroup">
-              <Input
-                type="text"
-                placeholder="Qual sua sugestão?"
-                value={suggestion.value}
-                onInput={(e) => suggestion.value = e.currentTarget.value}
-                onEnter={suggest}
-              />
-              <Button onClick={suggest}>Enviar</Button>
-            </div>
+            <SuggestionBox client={client} />
             <ul>
               {things}
             </ul>

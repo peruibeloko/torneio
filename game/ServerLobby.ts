@@ -103,6 +103,8 @@ export class ServerLobby {
     // remove player from lobby
     const idx = this.players.findIndex((p) => p.name === player);
     this.players.splice(idx, 1);
+
+    return this.players.length;
   }
 
   suggestThing(thing: string) {
@@ -156,7 +158,7 @@ export class ServerLobby {
     if (this.state.stage === "lobby") prevRound = 0;
     if (this.state.stage === "roundEnd") prevRound = this.state.round;
 
-     // TODO, probably based on match number
+    // TODO, probably based on match number
     const things: [Thing, Thing] = ["a" as Thing, "b" as Thing];
 
     this.state = {

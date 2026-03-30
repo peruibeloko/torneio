@@ -43,7 +43,9 @@ export class GameServer {
   }
 
   removePlayer(lobbyCode: string, player: string) {
-    this.getLobby(lobbyCode).removePlayer(player);
+    const remainingPlayers = this.getLobby(lobbyCode).removePlayer(player);
+    if (remainingPlayers !== 0) return;
+    this.#lobbies.delete(lobbyCode);
   }
 
   suggestThing(lobbyCode: string, thing: string) {

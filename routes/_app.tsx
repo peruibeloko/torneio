@@ -2,12 +2,19 @@ import { define } from "@/utils.ts";
 import { createContext } from "preact";
 import { GameClient } from "@/game/GameClient.ts";
 import { useEffect } from "preact/hooks";
+import { useSignal } from "@preact/signals";
 
-const client = new GameClient();
-export const GameContext = createContext<GameClient>(client);
+export const GameContext = createContext<GameClient>({} as GameClient);
 
 export default define.page(function App({ Component }) {
-  useEffect(() => () => client.leaveLobby, []);
+  const client = useSignal<GameClient>({} as GameClient);
+
+  useEffect(() => {
+    client.value = new GameClient();
+    return () => {
+      client.value!.leaveLobby();
+    };
+  }, []);
 
   return (
     <html>
@@ -17,7 +24,7 @@ export default define.page(function App({ Component }) {
         <title>Torneio</title>
       </head>
       <body>
-        <GameContext.Provider value={client}>
+        <GameContext.Provider value={client.value}>
           <Component />
         </GameContext.Provider>
       </body>

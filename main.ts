@@ -1,18 +1,15 @@
+import { GameServer } from "@/game/GameServer.ts";
 import { App, cors, staticFiles } from "fresh";
-import { type State } from "./utils.ts";
-import { LobbyManager } from "./game/LobbyManager.ts";
 
-function gracefulShutdown() {
-  console.log("Shutting down...");
-  kv.close();
-}
-
-export const app = new App<State>();
-export const lobbyManager = new LobbyManager();
-export const kv = await Deno.openKv();
+export const app = new App();
+export const gameServer = new GameServer();
 
 app.use(cors({ origin: "localhost:8000" }));
 app.use(staticFiles());
 app.fsRoutes();
+
+function gracefulShutdown() {
+  console.log("Shutting down...");
+}
 
 Deno.addSignalListener("SIGTERM", gracefulShutdown);

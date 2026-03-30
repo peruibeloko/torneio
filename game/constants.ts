@@ -1,3 +1,7 @@
+import { Signal } from "@preact/signals";
+
+declare const tags: unique symbol;
+
 export const PARTS = {
   ROOT: "games",
   INFO: "info",
@@ -15,37 +19,84 @@ export const KEYS = {
   LOBBY_THINGS: (code: string) => [PARTS.ROOT, PARTS.THINGS, code],
 };
 
-export interface JoinMsg {
-  code: string;
+export interface ServerPlayer {
   name: string;
+  ready: boolean;
+  socket: WebSocket;
+}
+
+export interface ClientPlayer {
+  name: string;
+  ready: boolean;
+}
+
+export type Thing = string & { [tags]: { "Thing": void } };
+
+export type Votes = { [thing: Thing]: Signal<string[]> };
+
+export interface JoinMsg {
+  lobbyCode: string;
+  player: string;
 }
 
 export interface LeaveMsg {
-  code: string;
-  name: string;
+  lobbyCode: string;
+  player: string;
 }
 
 export interface SuggestMsg {
+  lobbyCode: string;
   thing: string;
+}
+
+export interface ReadyMsg {
+  lobbyCode: string;
+  player: string;
 }
 
 export interface VoteMsg {
-  thing: string;
+  lobbyCode: string;
+  player: string;
+  thing: Thing;
 }
 
-export type AllPlayersMsg = string[];
-export type AllVotesMsg = {
-  [thing: string]: string[];
-};
+export type InMsg =
+  | { type: "create" }
+  | { type: "join"; data: JoinMsg }
+  | { type: "leave"; data: LeaveMsg }
+  | { type: "suggest"; data: SuggestMsg }
+  | { type: "ready"; data: ReadyMsg }
+  | { type: "vote"; data: VoteMsg };
+
+export type AllPlayersMsg = {
+  name: string;
+  ready: boolean;
+}[];
+
 export type AllSuggestionsMsg = string[];
 
-export type InMsg =
-  | { type: "join"; data: JoinMsg }
-  | { type: "vote"; data: VoteMsg }
-  | { type: "leave"; data: LeaveMsg }
-  | { type: "suggest"; data: SuggestMsg };
+export interface AllVotesMsg {
+  [thing: Thing]: string[];
+}
+
+export interface RoundStartMsg {
+  things: [Thing, Thing];
+  round: number;
+}
+
+export interface RoundEndMsg {
+  winner: string;
+  gameEnd: boolean;
+}
 
 export type OutMsg =
   | { type: "allPlayers"; data: AllPlayersMsg }
   | { type: "allVotes"; data: AllVotesMsg }
-  | { type: "allSuggestions"; data: AllSuggestionsMsg };
+  | { type: "allSuggestions"; data: AllSuggestionsMsg }
+  | { type: "playerJoined"; data: string }
+  | { type: "playerReady"; data: string }
+  | { type: "playerLeft"; data: string }
+  | { type: "newVote"; data: VoteMsg }
+  | { type: "newSuggestion"; data: string }
+  | { type: "roundStart"; data: RoundStartMsg }
+  | { type: "roundEnd"; data: RoundEndMsg };

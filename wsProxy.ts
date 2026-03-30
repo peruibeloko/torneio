@@ -1,6 +1,6 @@
 import { handleRoute } from "@/routes/api/game.ts";
-import { LobbyManager } from "@/game/LobbyManager.ts";
+import { GameServer } from "@/game/GameServer.ts";
 
-export const lobbyManager = new LobbyManager();
+export const gameServer = new GameServer();
 
 Deno.serve({ port: 8000 }, handleRoute);

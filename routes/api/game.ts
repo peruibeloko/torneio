@@ -1,5 +1,5 @@
-import { handleMessage } from "@/game/comms.ts";
 import { define } from "@/utils.ts";
+import { gameServer } from "@/main.ts";
 
 export const handler = define.handlers({
   GET: (ctx) => handleRoute(ctx.req),
@@ -11,11 +11,6 @@ export function handleRoute(req: Request) {
   }
 
   const { socket, response } = Deno.upgradeWebSocket(req);
-
-  socket.addEventListener("message", ({ data }) => {
-    const res = handleMessage(JSON.parse(data), socket);
-    if (res) socket.send(JSON.stringify(res));
-  });
-
+  gameServer.addConnection(socket);
   return response;
 }

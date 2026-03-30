@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [fresh()],
   server: {
     proxy: {
-      "/api/game": {
+      "/api": {
         target: "localhost:8000",
         ws: true,
         rewriteWsOrigin: true

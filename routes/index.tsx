@@ -1,6 +1,6 @@
 import "@/assets/home.css";
-import { Button } from "@/components/Button.tsx";
-import { Input } from "@/components/Input.tsx";
+import { Button } from "@/islands/Button.tsx";
+import { Input } from "@/islands/Input.tsx";
 import { GameContext } from "@/routes/_app.tsx";
 import { define } from "@/utils.ts";
 import { useSignal } from "@preact/signals";

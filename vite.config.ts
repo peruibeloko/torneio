@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vueRouter from 'vue-router/vite';
 import deno from '@deno/vite-plugin';
 
 export default defineConfig({
-  plugins: [vue(), deno()],
+  plugins: [
+    vueRouter({
+      routesFolder: 'pages'
+    }),
+    vue(),
+    deno()
+  ],
   root: './',
   resolve: {
     alias: [{ find: '@', replacement: './' }]

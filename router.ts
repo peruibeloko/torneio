@@ -1,25 +1,11 @@
-import { createRouter, createWebHistory } from "vue-router";
-import Home from "@/pages/Home.vue";
-import Lobby from "@/pages/Lobby.vue";
-import Game from "@/pages/Game.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import { handleHotUpdate, routes } from 'vue-router/auto-routes';
 
-export default createRouter({
+export const router = createRouter({
   history: createWebHistory(),
-  routes: [
-    {
-      path: "/",
-      name: "home",
-      component: Home,
-    },
-    {
-      path: "/lobby",
-      name: "lobby",
-      component: Lobby,
-    },
-    {
-      path: "/game",
-      name: "game",
-      component: Game,
-    },
-  ],
+  routes
 });
+
+if (import.meta.hot) {
+  handleHotUpdate(router);
+}

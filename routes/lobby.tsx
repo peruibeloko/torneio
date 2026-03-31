@@ -1,25 +1,19 @@
 import "@/assets/lobby.css";
-import { GameContext } from "@/routes/_app.tsx";
+import { SuggestionBox } from "@/islands/SuggestionBox.tsx";
 import { define } from "@/utils.ts";
 import { computed } from "@preact/signals";
-import { useContext } from "preact/hooks";
-import { SuggestionBox } from "@/islands/SuggestionBox.tsx";
+import { useGameClient } from "@/hooks/useGameClient.ts";
+import { Button } from "../components/Button.tsx";
 
-export default define.page(function Lobby(ctx) {
-  const client = useContext(GameContext);
+export default define.page(function Lobby() {
+  const client = useGameClient();
 
   const players = computed(() =>
-    client
-      .players
-      .value
-      .map((p) => <li key={p}>{p}</li>)
+    client.players.value.map((p) => <li key={p}>{p}</li>)
   );
 
   const things = computed(() =>
-    client
-      .things
-      .value
-      .map((t) => <li key={t}>{t}</li>)
+    client.things.value.map((t) => <li key={t}>{t}</li>)
   );
 
   return (
@@ -40,13 +34,13 @@ export default define.page(function Lobby(ctx) {
           <div className="vbar"></div>
           <section>
             <h2>Coisas</h2>
-            <SuggestionBox client={client} />
+            <SuggestionBox />
             <ul>
               {things}
             </ul>
           </section>
         </div>
-        <button type="button">ESTOU PRONTO!</button>
+        <Button onClick={client.ready}>ESTOU PRONTO!</Button>
       </main>
     </>
   );

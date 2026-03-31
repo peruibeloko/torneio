@@ -1,16 +1,17 @@
-import { GameClient } from "@/game/GameClient.ts";
-import { useSignal } from "@preact/signals";
-import { UncontrolledInput } from "@/components/Input.tsx";
 import { Button } from "@/components/Button.tsx";
+import { UncontrolledInput } from "@/components/Input.tsx";
+import { useGameClient } from "@/hooks/useGameClient.ts";
+import { useSignal } from "@preact/signals";
 
 interface Props {
-  client: GameClient;
   playerName: string;
 }
 
 export function JoinGame(props: Props) {
+  const client = useGameClient();
+
   const joinLobby = () => {
-    props.client.joinLobby(props.playerName, lobbyCode.value);
+    client.joinLobby(props.playerName, lobbyCode.value);
     history.pushState({}, "", "/lobby");
   };
 
@@ -22,7 +23,7 @@ export function JoinGame(props: Props) {
       <UncontrolledInput
         type="text"
         placeholder="Código de sala"
-        onInput={(e) => (lobbyCode.value = e.currentTarget.value)}
+        signal={lobbyCode}
         onEnter={joinLobby}
       />
       <Button onClick={joinLobby}>Entrar</Button>

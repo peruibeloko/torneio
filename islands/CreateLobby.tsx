@@ -1,14 +1,15 @@
 import { Button } from "@/components/Button.tsx";
-import { GameClient } from "@/game/GameClient.ts";
+import { useGameClient } from "@/hooks/useGameClient.ts";
 
 interface Props {
-  client: GameClient;
   playerName: string;
 }
 
 export function CreateLobby(props: Props) {
+  const client = useGameClient();
+
   const createLobby = async () => {
-    await props.client.createLobby(props.playerName);
+    await client.createLobby(props.playerName);
     history.pushState({}, "", "/lobby");
   };
 

@@ -1,7 +1,6 @@
 import { createDefine } from "fresh";
-import { ClientState } from "@/main.ts";
 
-export const define = createDefine<ClientState>();
+export const define = createDefine();
 
 export const collectKv = async <T>(list: Deno.KvListIterator<T>) => {
   const out = [];

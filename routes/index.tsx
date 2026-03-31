@@ -1,15 +1,11 @@
 import "@/assets/home.css";
 import { UncontrolledInput } from "@/components/Input.tsx";
+import { CreateLobby } from "@/islands/CreateLobby.tsx";
 import { JoinGame } from "@/islands/JoinGame.tsx";
-import { GameContext } from "@/routes/_app.tsx";
 import { define } from "@/utils.ts";
 import { useSignal } from "@preact/signals";
-import { useContext } from "preact/hooks";
-import { CreateLobby } from "../islands/CreateLobby.tsx";
 
-export default define.page(function Home(ctx) {
-  const client = useContext(GameContext);
-
+export default define.page(function Home() {
   const playerName = useSignal("");
 
   return (
@@ -24,9 +20,9 @@ export default define.page(function Home(ctx) {
           signal={playerName}
         />
         <section>
-          <JoinGame client={client} playerName={playerName.value} />
+          <JoinGame playerName={playerName.value} />
           <div class="vbar"></div>
-          <CreateLobby client={client} playerName={playerName.value} />
+          <CreateLobby playerName={playerName.value} />
         </section>
       </main>
     </>

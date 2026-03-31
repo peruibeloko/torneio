@@ -1,17 +1,11 @@
 import "@/assets/game.css";
-import { GameContext } from "@/routes/_app.tsx";
-import { define } from "@/utils.ts";
-import { useSignal } from "@preact/signals";
-import { useContext, useRef } from "preact/hooks";
 import { Button } from "@/components/Button.tsx";
-import { GameClient } from "@/game/GameClient.ts";
+import { useSignal } from "@preact/signals";
+import { useRef } from "preact/hooks";
+import { useGameClient } from "../hooks/useGameClient.ts";
 
-interface Props {
-  client: GameClient;
-}
-
-export function GameContent(props: Props) {
-  const { client } = props;
+export function GameContent() {
+  const client = useGameClient();
 
   const vote = (thing: "L" | "R") => () => {
     const isL = thing === "L";

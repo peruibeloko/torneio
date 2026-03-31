@@ -1,16 +1,13 @@
 import { Button } from "@/components/Button.tsx";
 import { ControlledInput } from "@/components/Input.tsx";
-import { GameClient } from "@/game/GameClient.ts";
 import { useSignal } from "@preact/signals";
+import { useGameClient } from "../hooks/useGameClient.ts";
 
-interface Props {
-  client: GameClient;
-}
-
-export function SuggestionBox(props: Props) {
+export function SuggestionBox() {
+  const client = useGameClient();
   const suggestion = useSignal("");
   const suggest = () => {
-    props.client.suggest(suggestion.value);
+    client.suggest(suggestion.value);
     suggestion.value = "";
   };
   return (

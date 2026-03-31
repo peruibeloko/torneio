@@ -9,7 +9,7 @@ import {
 import { computed, signal } from "@preact/signals";
 
 export class GameClient {
-  #socket: WebSocket;
+  #socket = {} as WebSocket;
   #playerName = "";
   #lobbyCode = "";
 
@@ -24,8 +24,6 @@ export class GameClient {
   #roundStartCallback = () => {};
 
   constructor() {
-    this.#socket = new WebSocket("/api/game");
-    this.#setupHandler();
   }
 
   get players() {
@@ -58,6 +56,11 @@ export class GameClient {
 
   get gameEnd() {
     return this.#isGameEnd;
+  }
+
+  setup() {
+    this.#socket = new WebSocket("/api/game");
+    this.#setupHandler();
   }
 
   async createLobby(name: string) {

@@ -1,17 +1,17 @@
 import { Button } from "@/components/Button.tsx";
 import { UncontrolledInput } from "@/components/Input.tsx";
 import { useGameClient } from "@/hooks/useGameClient.ts";
-import { useSignal } from "@preact/signals";
+import { Signal, useSignal } from "@preact/signals";
 
 interface Props {
-  playerName: string;
+  playerName: Signal<string>;
 }
 
 export function JoinGame(props: Props) {
   const client = useGameClient();
 
   const joinLobby = () => {
-    client.joinLobby(props.playerName, lobbyCode.value);
+    client.joinLobby(props.playerName.value, lobbyCode.value);
     history.pushState({}, "", "/lobby");
   };
 

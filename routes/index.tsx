@@ -1,30 +1,27 @@
 import "@/assets/home.css";
-import { UncontrolledInput } from "@/components/Input.tsx";
 import { CreateLobby } from "@/islands/CreateLobby.tsx";
 import { JoinGame } from "@/islands/JoinGame.tsx";
 import { define } from "@/utils.ts";
 import { useSignal } from "@preact/signals";
+import { NameInput } from "../islands/NameInput.tsx";
+import { Partial } from "fresh/runtime";
 
 export default define.page(function Home() {
   const playerName = useSignal("");
 
   return (
-    <>
+    <Partial name="home">
       <header>
         <h1>BEM VINDO AO TORNEIO DAS COISAS</h1>
       </header>
       <main>
-        <UncontrolledInput
-          type="text"
-          placeholder="Qual vai ser seu nome?"
-          signal={playerName}
-        />
+        <NameInput playerName={playerName} />
         <section>
-          <JoinGame playerName={playerName.value} />
+          <JoinGame playerName={playerName} />
           <div class="vbar"></div>
-          <CreateLobby playerName={playerName.value} />
+          <CreateLobby playerName={playerName} />
         </section>
       </main>
-    </>
+    </Partial>
   );
 });

@@ -1,15 +1,16 @@
 import { GameContext } from "@/main.ts";
 import { define } from "@/utils.ts";
+import "preact/debug";
 import { useContext, useEffect } from "preact/hooks";
 
 export default define.page(function App({ Component }) {
   const client = useContext(GameContext);
 
   useEffect(() => {
-    client.value.setup();
+    client.setup();
 
     return () => {
-      client.value.leaveLobby();
+      client.leaveLobby();
     };
   }, []);
 
@@ -20,7 +21,7 @@ export default define.page(function App({ Component }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Torneio</title>
       </head>
-      <body>
+      <body f-client-nav>
         <GameContext.Provider value={client}>
           <Component />
         </GameContext.Provider>

@@ -4,6 +4,7 @@ import { define } from "@/utils.ts";
 import { computed } from "@preact/signals";
 import { useGameClient } from "@/hooks/useGameClient.ts";
 import { Button } from "../components/Button.tsx";
+import { Partial } from "fresh/runtime";
 
 export default define.page(function Lobby() {
   const client = useGameClient();
@@ -17,11 +18,9 @@ export default define.page(function Lobby() {
   );
 
   return (
-    <>
+    <Partial name="lobby">
       <header>
-        <h1>
-          LOBBY
-        </h1>
+        <h1>LOBBY</h1>
       </header>
       <main>
         <div>
@@ -42,6 +41,6 @@ export default define.page(function Lobby() {
         </div>
         <Button onClick={client.ready}>ESTOU PRONTO!</Button>
       </main>
-    </>
+    </Partial>
   );
 });

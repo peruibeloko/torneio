@@ -2,53 +2,31 @@
   "nodeModulesDir": "manual",
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
-    "ws-proxy": "deno run -A --watch routes/api/game.ts",
-    "dev-server": "vite",
-    "dev": "wt deno task ws-proxy && wt deno task dev-server",
-    "build": "vite build",
-    "start": "deno serve -A _fresh/server.js",
-    "update": "deno run -A -r jsr:@fresh/update ."
+    "dev": "deno task dev:api && deno task dev:vite",
+    "dev:api": "wt deno serve --allow-env --allow-net server.ts",
+    "dev:vite": "wt deno run -A npm:vite",
+    "build": "deno run -A npm:vite build",
+    "server:start": "deno serve -A --watch ./server.ts",
+    "serve": "deno run build && deno run server:start",
+    "preview": "vite preview"
   },
   "lint": {
     "rules": {
-      "tags": ["fresh", "recommended"]
+      "tags": ["recommended"]
     }
   },
-  "exclude": ["**/_fresh/*"],
   "imports": {
     "@/": "./",
-    "fresh": "jsr:@fresh/core@^2.2.1",
-    "preact": "npm:preact@^10.27.2",
-    "@preact/signals": "npm:@preact/signals@^2.5.0",
-    "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.8",
-    "vite": "npm:vite@^7.1.3"
+    "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
+    "hono": "jsr:@hono/hono@^4.12.9",
+    "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.5",
+    "vite": "npm:vite@^7.3.1",
+    "vue": "npm:vue@^3.5.31",
+    "vue-router": "npm:vue-router@^5.0.4",
+    "vue-tsc": "npm:vue-tsc@^3.2.6"
   },
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.asynciterable",
-      "dom.iterable",
-      "deno.ns",
-      "deno.unstable"
-    ],
-    "jsx": "precompile",
-    "jsxImportSource": "preact",
-    "jsxPrecompileSkipElements": [
-      "a",
-      "img",
-      "source",
-      "body",
-      "html",
-      "head",
-      "title",
-      "meta",
-      "script",
-      "link",
-      "style",
-      "base",
-      "noscript",
-      "template"
-    ],
+    "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns"],
     "types": ["vite/client"]
   }
 }

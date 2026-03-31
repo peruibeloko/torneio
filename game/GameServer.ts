@@ -1,5 +1,5 @@
-import { InMsg, OutMsg, ServerPlayer, Thing } from "@/game/constants.ts";
-import { ServerLobby } from "@/game/ServerLobby.ts";
+import { InMsg, OutMsg, ServerPlayer, Thing } from '@/game/constants.ts';
+import { ServerLobby } from '@/game/ServerLobby.ts';
 
 type Lobbies = Map<string, ServerLobby>;
 
@@ -7,12 +7,6 @@ export class GameServer {
   #lobbies: Lobbies = new Map();
 
   constructor() {}
-
-  static async getGameServer() {
-    return Deno.env.get("DENO_DEPLOYMENT_ID")
-      ? (await import("@/main.ts")).gameServer
-      : (await import("@/wsProxy.ts")).gameServer;
-  }
 
   getLobby(lobbyCode: string) {
     return this.#lobbies.get(lobbyCode)!;
@@ -66,46 +60,49 @@ export class GameServer {
   }
 
   addConnection(socket: WebSocket) {
-    socket.addEventListener("message", ({ data }) => {
+    socket.addEventListener('message', ({ data }) => {
       this.handleMsg(JSON.parse(data), socket);
     });
   }
 
   sendMsg(msg: OutMsg, socket: WebSocket) {
+    console.log('sending message', msg);
     socket.send(JSON.stringify(msg));
   }
 
   handleMsg(msg: InMsg, socket: WebSocket) {
+    console.log('new message', msg);
+
     switch (msg.type) {
-      case "create":
+      case 'create':
         this.createLobby();
         break;
 
-      case "join":
+      case 'join':
         this.addPlayer(msg.data.lobbyCode, msg.data.player, {
           socket,
-          ready: false,
+          ready: false
         });
         break;
 
-      case "ready":
+      case 'ready':
         this.playerReady(msg.data.lobbyCode, msg.data.player);
         break;
 
-      case "suggest":
+      case 'suggest':
         this.suggestThing(msg.data.lobbyCode, msg.data.thing);
         break;
 
-      case "vote":
+      case 'vote':
         this.voteFor(msg.data.lobbyCode, msg.data.thing, msg.data.player);
         break;
 
-      case "leave":
+      case 'leave':
         this.removePlayer(msg.data.lobbyCode, msg.data.player);
         break;
 
       default:
-        console.error("Unsupported message:", msg);
+        console.error('Unsupported message:', msg);
         msg;
         break;
     }

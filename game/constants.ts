@@ -1,4 +1,4 @@
-import { Signal } from "@preact/signals";
+import { Ref } from "vue";
 
 declare const tags: unique symbol;
 
@@ -31,7 +31,7 @@ export interface ClientPlayer {
 
 export type Thing = string & { [tags]: { "Thing": void } };
 
-export type ClientVotes = { [thing: Thing]: Signal<string[]> };
+export type ClientVotes = { [thing: Thing]: Ref<string[]> };
 export type ServerVotes = { [thing: string]: string[] };
 
 export interface JoinMsg {

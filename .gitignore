@@ -5,8 +5,9 @@
 .env.production.local
 .env.local
 
-# Fresh build directory
-_fresh/
+dist/
+.vite/**
+
 # npm + other dependencies
 node_modules/
 vendor/

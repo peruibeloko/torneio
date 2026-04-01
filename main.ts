@@ -1,20 +1,17 @@
-import { GameServer } from "@/game/GameServer.ts";
-import { App, cors, staticFiles } from "fresh";
-import { createContext } from "preact";
-import { GameClient } from "@/game/GameClient.ts";
-import { IS_BROWSER } from "fresh/runtime";
+import App from '@/App.vue';
+import { GameClient } from '@/game/GameClient.ts';
+import { router } from '@/router.ts';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { useGameInternalStore } from './stores/gameInternal.ts';
 
-export const app = new App();
-export const gameServer = new GameServer();
+const app = createApp(App);
+const pinia = createPinia();
 
-export const GameContext = createContext(new GameClient());
+app.use(pinia);
+app.use(router);
+app.mount('#app');
 
-app.use(cors({ origin: "localhost:8000" }));
-app.use(staticFiles());
-app.fsRoutes();
-
-function gracefulShutdown() {
-  console.log("Shutting down...");
-}
-
-if (!IS_BROWSER) Deno.addSignalListener("SIGTERM", gracefulShutdown);
+const internalGame = useGameInternalStore();
+internalGame.socket = new WebSocket('/api/game');
+new GameClient();

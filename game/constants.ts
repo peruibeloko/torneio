@@ -1,12 +1,13 @@
-import { Signal } from "@preact/signals";
+import { Ref } from 'vue';
+import { ServerVotes } from './ServerVotes.ts';
 
 declare const tags: unique symbol;
 
 export const PARTS = {
-  ROOT: "games",
-  INFO: "info",
-  PLAYERS: "players",
-  THINGS: "things",
+  ROOT: 'games',
+  INFO: 'info',
+  PLAYERS: 'players',
+  THINGS: 'things'
 };
 
 export const KEYS = {
@@ -16,7 +17,7 @@ export const KEYS = {
 
   LOBBY_INFO: (code: string) => [PARTS.ROOT, PARTS.INFO, code],
   LOBBY_PLAYERS: (code: string) => [PARTS.ROOT, PARTS.PLAYERS, code],
-  LOBBY_THINGS: (code: string) => [PARTS.ROOT, PARTS.THINGS, code],
+  LOBBY_THINGS: (code: string) => [PARTS.ROOT, PARTS.THINGS, code]
 };
 
 export type ServerPlayer = {
@@ -29,10 +30,26 @@ export interface ClientPlayer {
   ready: boolean;
 }
 
-export type Thing = string & { [tags]: { "Thing": void } };
+export type Thing = string & { [tags]: { Thing: void } };
 
-export type ClientVotes = { [thing: Thing]: Signal<string[]> };
-export type ServerVotes = { [thing: string]: string[] };
+export type ClientVotes = { [thing: Thing]: Ref<string[]> };
+
+export type GameState =
+  | { stage: 'lobby'; things: string[]; remainingReady: number }
+  | { stage: 'roundEnd'; round: number; winner: string; gameEnd: boolean }
+  | {
+      stage: 'game';
+      round: number;
+      totalVotes: number;
+      votes: ServerVotes;
+    };
+
+export type GameStages = GameState['stage'];
+
+export interface GameInfo {
+  uniqueName: string;
+  stage: GameStages;
+}
 
 export interface JoinMsg {
   lobbyCode: string;
@@ -61,12 +78,12 @@ export interface VoteMsg {
 }
 
 export type InMsg =
-  | { type: "create" }
-  | { type: "join"; data: JoinMsg }
-  | { type: "leave"; data: LeaveMsg }
-  | { type: "suggest"; data: SuggestMsg }
-  | { type: "ready"; data: ReadyMsg }
-  | { type: "vote"; data: VoteMsg };
+  | { type: 'create' }
+  | { type: 'join'; data: JoinMsg }
+  | { type: 'leave'; data: LeaveMsg }
+  | { type: 'suggest'; data: SuggestMsg }
+  | { type: 'ready'; data: ReadyMsg }
+  | { type: 'vote'; data: VoteMsg };
 
 export type AllPlayersMsg = {
   name: string;
@@ -76,7 +93,15 @@ export type AllPlayersMsg = {
 export type AllSuggestionsMsg = string[];
 
 export interface AllVotesMsg {
-  [thing: Thing]: string[];
+  thingL: Thing;
+  thingR: Thing;
+  votesL: string[];
+  votesR: string[];
+}
+
+export interface GameInfoMsg {
+  uniqueName: string;
+  stage: GameStages;
 }
 
 export interface RoundStartMsg {
@@ -90,13 +115,15 @@ export interface RoundEndMsg {
 }
 
 export type OutMsg =
-  | { type: "allPlayers"; data: AllPlayersMsg }
-  | { type: "allVotes"; data: AllVotesMsg }
-  | { type: "allSuggestions"; data: AllSuggestionsMsg }
-  | { type: "playerJoined"; data: string }
-  | { type: "playerReady"; data: string }
-  | { type: "playerLeft"; data: string }
-  | { type: "newVote"; data: VoteMsg }
-  | { type: "newSuggestion"; data: string }
-  | { type: "roundStart"; data: RoundStartMsg }
-  | { type: "roundEnd"; data: RoundEndMsg };
+  | { type: 'allPlayers'; data: AllPlayersMsg }
+  | { type: 'allVotes'; data: AllVotesMsg }
+  | { type: 'allSuggestions'; data: AllSuggestionsMsg }
+  | { type: 'playerJoined'; data: string }
+  | { type: 'playerReady'; data: string }
+  | { type: 'playerLeft'; data: string }
+  | { type: 'newVote'; data: VoteMsg }
+  | { type: 'newSuggestion'; data: string }
+  | { type: 'gameStart' }
+  | { type: 'gameInfo'; data: GameInfoMsg }
+  | { type: 'roundStart'; data: RoundStartMsg }
+  | { type: 'roundEnd'; data: RoundEndMsg };

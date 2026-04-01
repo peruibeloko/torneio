@@ -1,113 +1,110 @@
-import { collect } from "@/utils.ts";
-import { OutMsg, ServerPlayer, ServerVotes, Thing } from "@/game/constants.ts";
-import { Tournament } from "@/game/Tournament.ts";
-
-export type GameState =
-  | { stage: "lobby"; things: string[]; remainingReady: number }
-  | { stage: "roundEnd"; round: number; winner: string; gameEnd: boolean }
-  | {
-    stage: "game";
-    round: number;
-    remainingVotes: number;
-    votes: ServerVotes;
-  };
+import { GameState, OutMsg, ServerPlayer, Thing } from '@/game/constants.ts';
+import { Tournament } from '@/game/Tournament.ts';
+import { ServerVotes } from './ServerVotes.ts';
 
 export class ServerLobby {
   #lobbyCode: string;
   #players = new Map<string, ServerPlayer>();
   #state: GameState;
-  #battleCount: number = 1;
   #tournament = new Tournament();
 
   constructor(lobbyCode: string) {
     this.#lobbyCode = lobbyCode;
     this.#state = {
-      stage: "lobby",
+      stage: 'lobby',
       things: [],
-      remainingReady: 0,
+      remainingReady: 0
     };
   }
 
   #sendMsg(msg: OutMsg, socket: WebSocket) {
+    console.log('sending message', msg);
     socket.send(JSON.stringify(msg));
   }
 
   #shoutMsg(msg: OutMsg) {
-    for (const { socket } of this.#players.values()) this.#sendMsg(msg, socket);
+    console.log('shouting message', msg);
+    for (const { socket } of this.#players.values())
+      socket.send(JSON.stringify(msg));
   }
 
-  addPlayer(
-    name: string,
-    player: ServerPlayer,
-  ) {
+  get stage() {
+    return this.#state.stage;
+  }
+
+  getUniqueName(name: string) {
     const createPlayerCode = () => {
       const randomInt = () => Math.ceil(Math.random() * 9);
-      const code = new Array(4)
-        .fill(0)
-        .map(randomInt);
-      return code.join("");
+      const code = new Array(4).fill(0).map(randomInt);
+      return code.join('');
     };
 
-    let uniqueName = name + "#" + createPlayerCode();
+    let uniqueName = name + '#' + createPlayerCode();
     while (this.#players.has(uniqueName)) {
-      uniqueName = name + "#" + createPlayerCode();
+      uniqueName = name + '#' + createPlayerCode();
     }
 
+    return uniqueName;
+  }
+
+  addPlayer(name: string, player: ServerPlayer) {
     this.#shoutMsg({
-      type: "playerJoined",
-      data: uniqueName,
+      type: 'playerJoined',
+      data: name
     });
 
+    this.#players.set(name, player);
+
     switch (this.#state.stage) {
-      case "lobby":
+      case 'lobby':
         {
           this.#sendMsg(
             {
-              type: "allPlayers",
-              data: collect(
-                this.#players.entries().map(([name, p]) => ({
+              type: 'allPlayers',
+              data: this.#players
+                .entries()
+                .map(([name, p]) => ({
                   name,
-                  ready: p.ready,
-                })),
-              ),
+                  ready: p.ready
+                }))
+                .toArray()
             },
-            player.socket,
+            player.socket
           );
 
           this.#sendMsg(
-            { type: "allSuggestions", data: this.#state.things },
-            player.socket,
+            { type: 'allSuggestions', data: this.#state.things },
+            player.socket
           );
 
           this.#state.remainingReady++;
         }
         break;
 
-      case "game":
+      case 'game':
         {
           this.#sendMsg(
-            { type: "allVotes", data: this.#state.votes },
-            player.socket,
+            { type: 'allVotes', data: this.#state.votes.all },
+            player.socket
           );
-
-          this.#state.remainingVotes++;
         }
         break;
 
-      case "roundEnd": {
-        this.#sendMsg({
-          type: "roundEnd",
-          data: { gameEnd: this.#state.gameEnd, winner: this.#state.winner },
-        }, player.socket);
+      case 'roundEnd': {
+        this.#sendMsg(
+          {
+            type: 'roundEnd',
+            data: { gameEnd: this.#state.gameEnd, winner: this.#state.winner }
+          },
+          player.socket
+        );
       }
     }
-
-    this.#players.set(uniqueName, player);
   }
 
   removePlayer(player: string) {
     // notify everyone of the leaving player
-    this.#shoutMsg({ type: "playerLeft", data: player });
+    this.#shoutMsg({ type: 'playerLeft', data: player });
 
     // remove player from lobby
     this.#players.delete(player);
@@ -116,17 +113,17 @@ export class ServerLobby {
   }
 
   suggestThing(thing: string) {
-    if (this.#state.stage !== "lobby") return;
+    if (this.#state.stage !== 'lobby') return;
 
-    this.#shoutMsg({ type: "newSuggestion", data: thing });
+    this.#shoutMsg({ type: 'newSuggestion', data: thing });
 
     this.#state.things.push(thing);
   }
 
   playerReady(player: string) {
-    if (this.#state.stage !== "lobby") return;
+    if (this.#state.stage !== 'lobby') return;
 
-    this.#shoutMsg({ type: "playerReady", data: player });
+    this.#shoutMsg({ type: 'playerReady', data: player });
 
     const playerData = this.#players.get(player)!;
     playerData.ready = true;
@@ -138,60 +135,75 @@ export class ServerLobby {
   }
 
   voteFor(thing: Thing, player: string) {
-    if (this.#state.stage !== "game") return;
+    if (this.#state.stage !== 'game') return;
 
     this.#shoutMsg({
-      type: "newVote",
-      data: { lobbyCode: this.#lobbyCode, player, thing },
+      type: 'newVote',
+      data: { lobbyCode: this.#lobbyCode, player, thing }
     });
 
-    this.#state.votes[thing].push(player);
-    this.#state.remainingVotes--;
+    this.#state.votes.vote(thing, player);
+    this.#state.totalVotes += 1;
 
-    if (this.#state.remainingVotes === 0) this.endRound();
+    console.log('total votes', this.#state.totalVotes);
+    console.log('total players', this.#players.size);
+    
+    if (this.#state.totalVotes === this.#players.size) this.endRound();
   }
 
   startGame() {
-    if (this.#state.stage !== "lobby") return;
+    if (this.#state.stage !== 'lobby') return;
+    console.log('starting game');
     this.#tournament.setup(this.#state.things as Thing[]);
+    this.#shoutMsg({ type: 'gameStart' });
     this.startRound();
   }
 
   startRound() {
-    if (this.#state.stage === "game") return;
+    if (this.#state.stage === 'game') return;
 
     const things = this.#tournament.getNextMatch();
 
+    console.log(
+      'starting match',
+      this.#tournament.currentRound,
+      'with',
+      things
+    );
+
     this.#state = {
-      stage: "game",
-      remainingVotes: this.#players.size,
+      stage: 'game',
+      totalVotes: 0,
       round: this.#tournament.currentRound,
-      votes: Object.fromEntries(things.map((t) => [t, []])),
+      votes: new ServerVotes(things[0], things[1])
     };
 
     this.#shoutMsg({
-      type: "roundStart",
-      data: { round: this.#state.round, things },
+      type: 'roundStart',
+      data: { round: this.#state.round, things }
     });
   }
 
   endRound() {
-    if (this.#state.stage !== "game") return;
-
-    const round = this.#state.round;
-    const gameEnd = round === this.#battleCount;
+    if (this.#state.stage !== 'game') return;
 
     const winner = this.#tournament.handleMatchEnd(this.#state.votes);
-    const winnerMsg = winner ?? "Empate!";
+
+    const round = this.#state.round;
+    const gameEnd = this.#tournament.isTournamentDone;
+    const winnerMsg = winner ?? 'Empate!';
+
+    console.log('match', round, 'ended, winner is', winner);
+    if (gameEnd) console.log('game end');
 
     this.#state = {
-      stage: "roundEnd",
+      stage: 'roundEnd',
       round,
       winner: winnerMsg,
-      gameEnd,
+      gameEnd
     };
 
-    this.#shoutMsg({ type: "roundEnd", data: { gameEnd, winner: winnerMsg } });
-    if (!gameEnd) setTimeout(() => this.startRound(), 5000);
+    this.#shoutMsg({ type: 'roundEnd', data: { gameEnd, winner: winnerMsg } });
+    if (!gameEnd) setTimeout(() => this.startRound(), 1000);
   }
 }

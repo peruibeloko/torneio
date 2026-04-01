@@ -39,7 +39,7 @@ export class GameClient {
   }
 
   #newSuggestion(thing: string) {
-    this.#game.things.push(thing);
+    this.#game.things.unshift(thing);
     console.log('got suggestion', thing);
   }
 

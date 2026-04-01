@@ -6,6 +6,7 @@
 
   <header>
     <h1>RODADA {{ game.round }}</h1>
+    <h2>{{ game.lobbyCode }}</h2>
   </header>
 
   <main>

@@ -11,13 +11,17 @@
     <section>
       <div class="side">
         <h2>Entrar em uma sala</h2>
-        <input
-          type="text"
-          placeholder="Código de sala"
-          v-model="internal.lobbyCode"
-          @keydown="onEnter(joinLobby)"
-        />
-        <button id="joinLobby" type="button" @click="joinLobby">Entrar</button>
+        <div class="inputGroup">
+          <input
+            type="text"
+            placeholder="Código de sala"
+            v-model="internal.lobbyCode"
+            @keydown="onEnter(joinLobby)"
+          />
+          <button id="joinLobby" type="button" @click="joinLobby">
+            Entrar
+          </button>
+        </div>
       </div>
       <div class="vbar"></div>
       <div class="side">

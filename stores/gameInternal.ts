@@ -10,7 +10,7 @@ export const useGameInternalStore = defineStore('gameInternal', () => {
   const players = ref<ClientPlayer[]>([]);
   const things = ref<string[]>([]);
 
-  const round = ref(0);
+  const round = ref(1);
   const winner = ref('');
   const isGameEnd = ref(false);
 

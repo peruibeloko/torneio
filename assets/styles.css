@@ -8,6 +8,55 @@
   padding: 0;
 }
 
+html,
+body {
+  height: 100dvh;
+}
+
+input {
+  height: 2rem;
+  padding: 1rem 0.5rem;
+  border: 3px solid crimson;
+  border-radius: 0.5rem;
+}
+
+button {
+  background: none;
+  border: none;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 3px solid crimson;
+
+  &:hover {
+    background: crimson;
+    color: white;
+  }
+}
+
+li {
+  font-family: monospace;
+  font-size: 1.2rem;
+}
+
+div.inputGroup {
+  display: flex;
+  input {
+    width: 10rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+  }
+
+  button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
 body {
   margin: auto;
   min-width: fit-content;
@@ -17,16 +66,22 @@ body {
   align-items: center;
 }
 
+header {
+  margin-top: 5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
 main {
   display: flex;
 }
 
 div.vbar {
+  min-height: 90%;
   margin: 0 2rem;
   grid-area: vbar;
-  background: black;
+  background: lightgray;
   width: 5px;
-  height: 10rem;
 }
 
 ul,

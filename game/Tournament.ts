@@ -48,10 +48,10 @@ export class Tournament {
   }
 
   handleMatchEnd(votes: ServerVotes) {
-    const allVotes = votes.votes;
-    const [thingL, thingR] = Object.keys(allVotes) as [Thing, Thing];
-    const votesL = allVotes[thingL].length;
-    const votesR = allVotes[thingR].length;
+    const allVotes = votes.all;
+    const { thingL, thingR } = allVotes;
+    const votesL = allVotes.votesL.length;
+    const votesR = allVotes.votesL.length;
 
     // handle ties
     if (votesL === votesR) {

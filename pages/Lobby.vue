@@ -15,7 +15,10 @@
       <div className="vbar"></div>
       <section>
         <h2>Coisas</h2>
-        <div className="inputgroup">
+        <ul class="things">
+          <li v-for="t in game.things" :key="t">{{ t }}</li>
+        </ul>
+        <div className="inputGroup">
           <input
             type="text"
             placeholder="Qual sua sugestão?"
@@ -24,12 +27,9 @@
           />
           <button type="button" @click="suggest">Enviar</button>
         </div>
-        <ul>
-          <li v-for="t in game.things" :key="t">{{ t }}</li>
-        </ul>
       </section>
     </div>
-    <button @click="game.ready">ESTOU PRONTO!</button>
+    <button id="ready" @click="game.ready">ESTOU PRONTO!</button>
   </main>
 </template>
 

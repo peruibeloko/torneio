@@ -1,4 +1,9 @@
-import { AllVotesMsg, ClientPlayer, OutMsg, Thing } from '@/game/constants.ts';
+import type {
+  AllVotesMsg,
+  ClientPlayer,
+  OutMsg,
+  Thing
+} from '@/src/game/constants.ts';
 import { useGameInternalStore } from '../stores/gameInternal.ts';
 import { useVotesInternalStore } from '../stores/votesInternal.ts';
 
@@ -22,11 +27,11 @@ export class GameClient {
 
   #startRound(things: [Thing, Thing], round: number) {
     this.#game.round = round;
-    
+
     this.#votes.reset();
     this.#votes.thingL = things[0];
     this.#votes.thingR = things[1];
-    
+
     this.#game.roundStartCallback();
     console.log('new round', this.#votes.thingL, this.#votes.thingR);
   }

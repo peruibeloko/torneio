@@ -1,4 +1,4 @@
-import { Thing } from './constants.ts';
+import type { Thing } from './constants.ts';
 
 export class ServerVotes {
   #thingL = '' as Thing;

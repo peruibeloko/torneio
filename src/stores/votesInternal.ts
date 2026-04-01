@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { AllVotesMsg, Thing } from '../game/constants.ts';
+import type { AllVotesMsg, Thing } from '../game/constants.ts';
 import { ref } from 'vue';
 import { computed } from 'vue';
 

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-import { GameInfo, GameStages, JoinMsg, Thing } from '../game/constants.ts';
+import type { GameInfo, GameStages, JoinMsg, Thing } from '../game/constants.ts';
 import { useGameInternalStore } from './gameInternal.ts';
 import { useVotesInternalStore } from './votesInternal.ts';
 

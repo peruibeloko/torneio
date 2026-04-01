@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { ClientPlayer, InMsg } from '../game/constants.ts';
+import type { ClientPlayer, InMsg } from '../game/constants.ts';
 
 export const useGameInternalStore = defineStore('gameInternal', () => {
   const socket = ref({} as WebSocket);

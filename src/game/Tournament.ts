@@ -33,32 +33,27 @@ export class Tournament {
     this.#contestants = this.#shuffleArray(things);
   }
 
-  getNextMatch(): [Thing, Thing] {
+  getNextMatch() {
     this.#round++;
 
-    if (this.#winner === '') {
-      const r = this.#contestants.pop()!;
-      const l = this.#contestants.pop()!;
-      console.log('remaining contestants', this.#contestants);
-      return [l, r];
-    }
-    const result = [this.#winner, this.#contestants.pop()!];
-    console.log('remaining contestants', this.#contestants);
-    return result as [Thing, Thing];
+    const l = this.#winner ? this.#winner : this.#contestants.pop()!;
+    const r = this.#contestants.pop()!;
+
+    return [l, r] as [Thing, Thing];
   }
 
   handleMatchEnd(votes: ServerVotes) {
-    const allVotes = votes.all;
-    const { thingL, thingR } = allVotes;
-    const votesL = allVotes.votesL.length;
-    const votesR = allVotes.votesL.length;
+    const allVotes = votes.votes;
+    const [thingL, thingR] = votes.things;
+
+    const votesL = allVotes[thingL].length;
+    const votesR = allVotes[thingR].length;
 
     // handle ties
     if (votesL === votesR) {
-      const prevWinner = thingL === this.#winner ? thingL : thingR;
       const newContestant = thingL === this.#winner ? thingR : thingL;
       this.#contestants = [newContestant, ...this.#contestants];
-      return prevWinner;
+      return null;
     }
 
     this.#winner = votesL > votesR ? thingL : thingR;

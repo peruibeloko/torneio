@@ -1,3 +1,4 @@
+import { SERVFAIL } from 'node:dns';
 import type { Thing } from './constants.ts';
 
 export class ServerVotes {
@@ -9,6 +10,10 @@ export class ServerVotes {
   constructor(thingL: Thing, thingR: Thing) {
     this.#thingL = thingL;
     this.#thingR = thingR;
+  }
+
+  get things() {
+    return [this.#thingL, this.#thingR]
   }
 
   get votes() {
@@ -30,13 +35,13 @@ export class ServerVotes {
   reset() {
     this.#thingL = '' as Thing;
     this.#thingR = '' as Thing;
-    this.#votesL.clear();
-    this.#votesR.clear();
+    this.#votesL = new Set();
+    this.#votesR = new Set();
   }
 
-  setThings([left, right]: [Thing, Thing]) {
-    this.#thingL = left;
-    this.#thingR = right;
+  setThing(which: 'l' | 'r', thing: Thing) {
+    if (which === 'l') this.#thingL = thing;
+    else this.#thingR = thing;
   }
 
   vote(thing: Thing, player: string) {
@@ -50,10 +55,10 @@ export class ServerVotes {
     this.#votesR.add(player);
   }
 
-  setVotes(left: [Thing, string[]], right: [Thing, string[]]) {
-    this.#thingL = left[0];
-    this.#thingR = right[0];
-    this.#votesL = new Set(left[1]);
-    this.#votesR = new Set(right[1]);
+  setVotes(thingL: Thing, votesL: string[], thingR: Thing, votesR: string[]) {
+    this.#thingL = thingL;
+    this.#thingR = thingR;
+    this.#votesL = new Set(votesL);
+    this.#votesR = new Set(votesR);
   }
 }

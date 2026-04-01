@@ -1,6 +1,6 @@
 <template>
   <header>
-    <h1>LOBBY ({{ game.lobbyCode }})</h1>
+    <h1>LOBBY (<span>{{ game.lobbyCode }}</span>)</h1>
   </header>
   <main>
     <div>

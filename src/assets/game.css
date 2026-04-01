@@ -4,6 +4,17 @@ dialog {
   text-align: center;
   border: 5px crimson solid;
   border-radius: 1rem;
+
+  h2 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 1rem;
+  }
+}
+
+header h2 {
+  font-family: monospace;
+  font-size: 1.2rem;
 }
 
 main {

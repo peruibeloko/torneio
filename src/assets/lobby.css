@@ -1,3 +1,7 @@
+header h1 span {
+  font-family: monospace;
+}
+
 main {
   flex-direction: column;
   align-items: center;
@@ -20,6 +24,7 @@ main {
     width: 100%;
     height: 20rem;
     border: 1px solid lightgray;
+    border-radius: 0.5rem;
     margin-top: 1rem;
     display: flex;
     flex-direction: column;

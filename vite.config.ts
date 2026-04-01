@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import VueRouter from 'vue-router/vite';
 import deno from '@deno/vite-plugin';
 
 export default defineConfig({
-  plugins: [deno(), vue()],
+  plugins: [
+    deno(),
+    vue(),
+    VueRouter({
+      routesFolder: './pages'
+    })
+  ],
   root: './',
   resolve: {
     alias: [{ find: '@', replacement: './' }]
@@ -18,7 +25,7 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
         ws: true
-      },
+      }
     }
   }
 });

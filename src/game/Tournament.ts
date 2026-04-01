@@ -1,4 +1,4 @@
-import { Thing } from '@/game/constants.ts';
+import { Thing } from '@/src/game/constants.ts';
 import { ServerVotes } from './ServerVotes.ts';
 
 export class Tournament {

@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { upgradeWebSocket, serveStatic } from 'hono/deno';
+import { serveStatic, upgradeWebSocket } from 'hono/deno';
 // import { cors } from "hono/cors";
 import { GameServer } from '@/src/game/GameServer.ts';
 import { JoinMsg } from '@/src/game/constants.ts';

@@ -22,9 +22,13 @@ export class GameClient {
 
   #startRound(things: [Thing, Thing], round: number) {
     this.#game.round = round;
-    this.#votes.setThings(things);
+    
+    this.#votes.reset();
+    this.#votes.thingL = things[0];
+    this.#votes.thingR = things[1];
+    
     this.#game.roundStartCallback();
-    console.log('new round', things);
+    console.log('new round', this.#votes.thingL, this.#votes.thingR);
   }
 
   #endRound(winner: string, gameEnd: boolean) {
@@ -71,8 +75,7 @@ export class GameClient {
   }
 
   #setVotes(votes: AllVotesMsg) {
-    const [l, r] = Object.entries(votes) as [Thing, string[]][];
-    this.#votes.setVotes(l, r);
+    this.#votes.setAll(votes);
     console.log('current votes:', votes);
   }
 

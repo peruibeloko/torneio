@@ -18,7 +18,6 @@ export const useGameStore = defineStore('game', () => {
   const gameEnd = computed(() => internal.isGameEnd);
 
   function roundStartLogic(cb: () => void) {
-    votesInternal.reset();
     internal.roundStartCallback = cb;
   }
 

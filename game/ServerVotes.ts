@@ -18,6 +18,15 @@ export class ServerVotes {
     };
   }
 
+  get all() {
+    return {
+      thingL: this.#thingL,
+      thingR: this.#thingR,
+      votesL: this.#votesL.values().toArray(),
+      votesR: this.#votesR.values().toArray()
+    };
+  }
+
   reset() {
     this.#thingL = '' as Thing;
     this.#thingR = '' as Thing;

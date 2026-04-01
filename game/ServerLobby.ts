@@ -84,11 +84,9 @@ export class ServerLobby {
       case 'game':
         {
           this.#sendMsg(
-            { type: 'allVotes', data: this.#state.votes.votes },
+            { type: 'allVotes', data: this.#state.votes.all },
             player.socket
           );
-
-          this.#state.remainingVotes++;
         }
         break;
 
@@ -145,9 +143,12 @@ export class ServerLobby {
     });
 
     this.#state.votes.vote(thing, player);
-    this.#state.remainingVotes--;
+    this.#state.totalVotes += 1;
 
-    if (this.#state.remainingVotes === 0) this.endRound();
+    console.log('total votes', this.#state.totalVotes);
+    console.log('total players', this.#players.size);
+    
+    if (this.#state.totalVotes === this.#players.size) this.endRound();
   }
 
   startGame() {
@@ -160,6 +161,7 @@ export class ServerLobby {
 
   startRound() {
     if (this.#state.stage === 'game') return;
+
     const things = this.#tournament.getNextMatch();
 
     console.log(
@@ -171,7 +173,7 @@ export class ServerLobby {
 
     this.#state = {
       stage: 'game',
-      remainingVotes: this.#players.size,
+      totalVotes: 0,
       round: this.#tournament.currentRound,
       votes: new ServerVotes(things[0], things[1])
     };

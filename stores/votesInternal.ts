@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { Thing } from '../game/constants.ts';
+import { AllVotesMsg, Thing } from '../game/constants.ts';
 import { ref } from 'vue';
 import { computed } from 'vue';
 
@@ -18,8 +18,8 @@ export const useVotesInternalStore = defineStore('votesInternal', () => {
   function reset() {
     thingL.value = '' as Thing;
     thingR.value = '' as Thing;
-    votesL.value.clear();
-    votesR.value.clear();
+    votesL.value = new Set();
+    votesR.value = new Set();
   }
 
   function setThings([left, right]: [Thing, Thing]) {
@@ -38,11 +38,11 @@ export const useVotesInternalStore = defineStore('votesInternal', () => {
     votesR.value.add(player);
   }
 
-  function setVotes(left: [Thing, string[]], right: [Thing, string[]]) {
-    thingL.value = left[0];
-    thingR.value = right[0];
-    votesL.value = new Set(left[1]);
-    votesR.value = new Set(right[1]);
+  function setAll(all: AllVotesMsg) {
+    thingL.value = all.thingL;
+    thingR.value = all.thingR;
+    votesL.value = new Set(all.votesL);
+    votesR.value = new Set(all.votesR);
   }
 
   return {
@@ -54,6 +54,6 @@ export const useVotesInternalStore = defineStore('votesInternal', () => {
     reset,
     setThings,
     vote,
-    setVotes
+    setAll
   };
 });

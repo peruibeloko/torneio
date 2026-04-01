@@ -35,9 +35,16 @@ export class Tournament {
 
   getNextMatch(): [Thing, Thing] {
     this.#round++;
-    if (this.#winner === '')
-      return [this.#contestants.pop()!, this.#contestants.pop()!];
-    return [this.#winner, this.#contestants.pop()!];
+
+    if (this.#winner === '') {
+      const r = this.#contestants.pop()!;
+      const l = this.#contestants.pop()!;
+      console.log('remaining contestants', this.#contestants);
+      return [l, r];
+    }
+    const result = [this.#winner, this.#contestants.pop()!];
+    console.log('remaining contestants', this.#contestants);
+    return result as [Thing, Thing];
   }
 
   handleMatchEnd(votes: ServerVotes) {
@@ -50,7 +57,7 @@ export class Tournament {
     if (votesL === votesR) {
       const prevWinner = thingL === this.#winner ? thingL : thingR;
       const newContestant = thingL === this.#winner ? thingR : thingL;
-      this.#contestants.unshift(newContestant);
+      this.#contestants = [newContestant, ...this.#contestants];
       return prevWinner;
     }
 

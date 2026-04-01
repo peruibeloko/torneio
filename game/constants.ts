@@ -1,5 +1,5 @@
 import { Ref } from 'vue';
-import { ServerVotes } from "./ServerVotes.ts";
+import { ServerVotes } from './ServerVotes.ts';
 
 declare const tags: unique symbol;
 
@@ -40,7 +40,7 @@ export type GameState =
   | {
       stage: 'game';
       round: number;
-      remainingVotes: number;
+      totalVotes: number;
       votes: ServerVotes;
     };
 
@@ -93,7 +93,10 @@ export type AllPlayersMsg = {
 export type AllSuggestionsMsg = string[];
 
 export interface AllVotesMsg {
-  [thing: Thing]: string[];
+  thingL: Thing;
+  thingR: Thing;
+  votesL: string[];
+  votesR: string[];
 }
 
 export interface GameInfoMsg {

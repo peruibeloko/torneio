@@ -1,4 +1,6 @@
-export const onEnter = (fn: () => void) => (e: KeyboardEvent) => {
-  if (e.key !== "Enter") return;
-  fn();
-};
+export function onEnter(fn: () => void) {
+  return (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return;
+    fn();
+  };
+}

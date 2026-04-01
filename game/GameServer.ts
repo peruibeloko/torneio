@@ -13,12 +13,17 @@ export class GameServer {
   }
 
   createLobby() {
-    const createRoomCode = () => {
-      const ASCII_UPPERCASE_A_OFFSET = 65;
-      const ALPHABET_LENGTH = 26;
+    const randomIntBetween = (min: number, max: number) => {
+      const minCeiled = Math.ceil(min);
+      const maxFloored = Math.floor(max);
+      return Math.floor(
+        Math.random() * (maxFloored - minCeiled + 1) + minCeiled
+      );
+    };
 
-      const getRandomChar = () =>
-        ASCII_UPPERCASE_A_OFFSET + Math.ceil(Math.random() * ALPHABET_LENGTH);
+    const createRoomCode = () => {
+      // A - Z in ASCII
+      const getRandomChar = () => randomIntBetween(65, 90);
 
       const codes = new Array(6)
         .fill(0) // or else map doesnt work
@@ -37,7 +42,21 @@ export class GameServer {
     return lobbyCode;
   }
 
+  joinLobby(lobbyCode: string, playerName: string) {
+    const lobby = this.getLobby(lobbyCode);
+    const uniqueName = lobby.getUniqueName(playerName);
+
+    return {
+      uniqueName,
+      stage: lobby.stage
+    };
+  }
+
   addPlayer(lobbyCode: string, name: string, player: ServerPlayer) {
+    player.socket.addEventListener('close', () => {
+      this.removePlayer(lobbyCode, name);
+    });
+
     this.getLobby(lobbyCode).addPlayer(name, player);
   }
 

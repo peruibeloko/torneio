@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { upgradeWebSocket, serveStatic } from 'hono/deno';
 // import { cors } from "hono/cors";
 import { GameServer } from '@/game/GameServer.ts';
+import { JoinMsg } from './game/constants.ts';
 
 const gameServer = new GameServer();
 
@@ -10,6 +11,12 @@ const api = new Hono();
 api.post('/createLobby', c => {
   const lobbyCode = gameServer.createLobby();
   return c.text(lobbyCode);
+});
+
+api.post('/joinLobby', async c => {
+  const body = await c.req.json<JoinMsg>();
+  const gameInfo = gameServer.joinLobby(body.lobbyCode, body.player);
+  return c.json(gameInfo);
 });
 
 api.get(

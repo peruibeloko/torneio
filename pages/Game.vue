@@ -1,17 +1,17 @@
 <template>
   <dialog ref="winnerModal" id="winner">
-    <h2>Vencedor{{ client.gameEnd.value ? null : ' da rodada' }}</h2>
-    <span>{{ client.winner.value }}</span>
+    <h2>Vencedor{{ game.gameEnd ? null : ' da rodada' }}</h2>
+    <span>{{ game.winner }}</span>
   </dialog>
 
   <header>
-    <h1>RODADA {{ client.round }}</h1>
+    <h1>RODADA {{ game.round }}</h1>
   </header>
 
   <main>
     <section>
       <span>{{ thingL }}</span>
-      <button @click="vote('L')" :disabled="disabledL">VOTAR</button>
+      <button @click="voteL" :disabled="disabledL">VOTAR</button>
       <ul>
         <li v-for="v in votesL" :key="v">{{ v }}</li>
       </ul>
@@ -19,7 +19,7 @@
     <div className="vbar"></div>
     <section>
       <span>{{ thingR }}</span>
-      <button @click="vote('R')" :disabled="disabledR">VOTAR</button>
+      <button @click="voteR" :disabled="disabledR">VOTAR</button>
       <ul>
         <li v-for="v in votesR" :key="v">{{ v }}</li>
       </ul>
@@ -29,38 +29,40 @@
 
 <script lang="ts" setup>
 import { ref, useTemplateRef } from 'vue';
-import { useGameClient } from '../composables/client';
+import { useGameStore } from '../stores/game';
+import { useVotesStore } from '../stores/votes';
 
-const client = useGameClient();
+const game = useGameStore();
+const votes = useVotesStore();
 
-const [votesL, votesR] = client.votes;
-const [thingL, thingR] = client.roundThings;
+const [thingL, thingR] = votes.things;
+const [votesL, votesR] = votes.votes;
 
 const disabledL = ref(false);
 const disabledR = ref(false);
 
 const winnerModal = useTemplateRef('winnerModal');
 
-client.roundEndLogic = () => {
+game.roundEndLogic(() => {
   winnerModal.value?.showModal();
-};
+});
 
-client.roundStartLogic = () => {
+game.roundStartLogic(() => {
   winnerModal.value?.close();
   disabledL.value = false;
   disabledR.value = false;
+});
+
+const voteL = () => {
+  game.vote(thingL);
+  disabledL.value = true;
+  disabledR.value = false;
 };
 
-const vote = (thing: 'L' | 'R') => () => {
-  const isL = thing === 'L';
-  client.vote(isL ? thingL : thingR);
-  if (isL) {
-    disabledL.value = true;
-    disabledR.value = false;
-  } else {
-    disabledL.value = false;
-    disabledR.value = true;
-  }
+const voteR = () => {
+  game.vote(thingR);
+  disabledL.value = false;
+  disabledR.value = true;
 };
 </script>
 

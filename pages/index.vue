@@ -6,7 +6,7 @@
     <input
       type="text"
       placeholder="Como quer ser chamado?"
-      v-model="playerName"
+      v-model="internal.playerName"
     />
     <section>
       <div class="side">
@@ -14,7 +14,7 @@
         <input
           type="text"
           placeholder="Código de sala"
-          v-model="lobbyCode"
+          v-model="internal.lobbyCode"
           @keydown="onEnter(joinLobby)"
         />
         <button id="joinLobby" type="button" @click="joinLobby">Entrar</button>
@@ -29,24 +29,24 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useGameClient } from '../composables/client.ts';
 import { onEnter } from '../composables/enter.ts';
+import { useGameStore } from '../stores/game.ts';
+import { useGameInternalStore } from '../stores/gameInternal.ts';
 
-const client = useGameClient();
 const router = useRouter();
-const playerName = ref('');
-const lobbyCode = ref('');
+const game = useGameStore();
+const internal = useGameInternalStore();
 
-const joinLobby = () => {
-  client.joinLobby(playerName.value, lobbyCode.value);
-  router.push({ name: 'lobby' });
+const joinLobby = async () => {
+  const stage = await game.joinLobby(internal.playerName, internal.lobbyCode);
+  if (stage === 'lobby') return router.push({ name: 'lobby' });
+  router.push({ name: 'game' });
 };
 
 const createLobby = async () => {
-  const lobbyCode = await client.createLobby(playerName.value);
-  client.joinLobby(playerName.value, lobbyCode);
+  const lobbyCode = await game.createLobby();
+  await game.joinLobby(internal.playerName, lobbyCode);
   router.push({ name: 'lobby' });
 };
 </script>

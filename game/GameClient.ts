@@ -1,191 +1,79 @@
-import {
-  AllVotesMsg,
-  ClientPlayer,
-  InMsg,
-  OutMsg,
-  Thing,
-  ClientVotes
-} from '@/game/constants.ts';
-import { computed, ref } from 'vue';
+import { AllVotesMsg, ClientPlayer, OutMsg, Thing } from '@/game/constants.ts';
+import { useGameInternalStore } from '../stores/gameInternal.ts';
+import { useVotesInternalStore } from '../stores/votesInternal.ts';
 
 export class GameClient {
-  #socket = {} as WebSocket;
-  #playerName = '';
-  #lobbyCode = '';
+  #game = useGameInternalStore();
+  #votes = useVotesInternalStore();
 
-  #players = ref<ClientPlayer[]>([]);
-  #things = ref<string[]>([]);
-
-  #round = ref(0);
-  #votes: ClientVotes = {};
-  #winner = ref('');
-  #isGameEnd = ref(false);
-  #roundEndCallback = () => {};
-  #roundStartCallback = () => {};
-
-  constructor(url: string | URL) {
-    this.#socket = new WebSocket(url);
-    this.#setupHandler();
-  }
-
-  get players() {
-    return this.#players;
-  }
-
-  get things() {
-    return this.#things;
-  }
-
-  get round() {
-    return this.#round;
-  }
-
-  get roundThings() {
-    return Object.keys(this.#votes) as [Thing, Thing];
-  }
-
-  get votes() {
-    const [thingL, thingR] = Object.keys(this.#votes) as [Thing, Thing];
-    const votesL = computed(() => this.#votes[thingL].value);
-    const votesR = computed(() => this.#votes[thingR].value);
-
-    return [votesL, votesR];
-  }
-
-  get winner() {
-    return this.#winner;
-  }
-
-  get gameEnd() {
-    return this.#isGameEnd;
-  }
-
-  async createLobby(name: string) {
-    this.#playerName = name;
-    this.#lobbyCode = await fetch('/api/createLobby', { method: 'POST' }).then(
-      r => r.text()
-    );
-    console.log(this.#playerName, 'created lobby', this.#lobbyCode);
-    return this.#lobbyCode;
-  }
-
-  joinLobby(name: string, lobbyCode: string) {
-    this.#playerName = name;
-    this.#lobbyCode = lobbyCode;
-    this.#sendMsg({
-      type: 'join',
-      data: { lobbyCode: this.#lobbyCode, player: name }
-    });
-    console.log(this.#playerName, 'joined lobby', this.#lobbyCode);
-  }
-
-  leaveLobby() {
-    this.#sendMsg({
-      type: 'leave',
-      data: { lobbyCode: this.#lobbyCode, player: this.#playerName }
-    });
-  }
-
-  suggest(thing: string) {
-    this.#sendMsg({
-      type: 'suggest',
-      data: { thing, lobbyCode: this.#lobbyCode }
-    });
-    console.log('suggesting', thing);
-  }
-
-  ready() {
-    this.#sendMsg({
-      type: 'ready',
-      data: {
-        lobbyCode: this.#lobbyCode,
-        player: this.#playerName
-      }
-    });
-    console.log(this.#playerName, 'is ready');
-  }
-
-  vote(thing: Thing) {
-    this.#sendMsg({
-      type: 'vote',
-      data: { player: this.#playerName, thing, lobbyCode: this.#lobbyCode }
-    });
-    console.log('voting for', thing);
-  }
-
-  set roundEndLogic(cb: () => void) {
-    this.#roundEndCallback = cb;
-  }
-
-  set roundStartLogic(cb: () => void) {
-    this.#roundStartCallback = cb;
-  }
-
-  #startRound(things: [Thing, Thing], round: number) {
-    this.#round.value = round;
-    this.#votes = {
-      [things[0]]: ref([]),
-      [things[1]]: ref([])
-    };
-    this.#roundStartCallback();
-    console.log('new round', this.#votes);
-  }
-
-  #endRound(winner: string, gameEnd: boolean) {
-    this.#winner.value = winner;
-    this.#isGameEnd.value = gameEnd;
-    this.#roundEndCallback();
-    console.log('round winner:', winner, 'game ended:', gameEnd);
-  }
-
-  #newSuggestion(thing: string) {
-    console.log('got suggestion', thing);
-    this.#things.value = [...this.#things.value, thing];
-  }
-
-  #newPlayer(name: string) {
-    console.log(name, 'joined');
-    this.#players.value = [...this.#players.value, { name, ready: false }];
-  }
-
-  #playerLeft(name: string) {
-    console.log(name, 'left');
-    const idx = this.#players.value.findIndex(p => p.name === name);
-    this.#players.value = this.#players.value.toSpliced(idx, 1);
-  }
-
-  #newVote(player: string, thing: Thing) {
-    const currentVotes = this.#votes[thing].value;
-    this.#votes[thing].value = [...currentVotes, player];
-    console.log(player, 'voted for', thing);
-  }
-
-  #setSuggestions(things: string[]) {
-    console.log('suggestions so far:', things);
-    this.#things.value = things;
-  }
-
-  #setPlayers(players: ClientPlayer[]) {
-    console.log('current players:', players);
-    this.#players.value = players;
-  }
-
-  #setVotes(votes: AllVotesMsg) {
-    console.log('current votes:', votes);
-    for (const key in votes) {
-      this.#votes[key as Thing].value = votes[key as Thing];
-    }
-  }
-
-  #setupHandler() {
-    this.#socket.addEventListener('message', e =>
+  constructor() {
+    this.#game.socket.addEventListener('message', e =>
       this.#handleMsg(JSON.parse(e.data))
     );
   }
 
-  #sendMsg(msg: InMsg) {
-    console.log('sending message', msg);
-    this.#socket.send(JSON.stringify(msg));
+  #updateInfo(uniqueName: string) {
+    this.#game.playerName = uniqueName;
+  }
+
+  #startGame() {
+    this.#game.gameStartCallback();
+  }
+
+  #startRound(things: [Thing, Thing], round: number) {
+    this.#game.round = round;
+    this.#votes.setThings(things);
+    this.#game.roundStartCallback();
+    console.log('new round', things);
+  }
+
+  #endRound(winner: string, gameEnd: boolean) {
+    this.#game.winner = winner;
+    this.#game.isGameEnd = gameEnd;
+    this.#game.roundEndCallback();
+    console.log('round winner:', winner, 'game ended:', gameEnd);
+  }
+
+  #newSuggestion(thing: string) {
+    this.#game.things.push(thing);
+    console.log('got suggestion', thing);
+  }
+
+  #newPlayer(name: string) {
+    this.#game.players.push({ name, ready: false });
+    console.log(name, 'joined');
+  }
+
+  #playerReady(name: string) {
+    const idx = this.#game.players.findIndex(p => p.name === name);
+    this.#game.players[idx].ready = true;
+  }
+
+  #playerLeft(name: string) {
+    const idx = this.#game.players.findIndex(p => p.name === name);
+    this.#game.players.splice(idx, 1);
+    console.log(name, 'left');
+  }
+
+  #newVote(player: string, thing: Thing) {
+    this.#votes.vote(thing, player);
+    console.log(player, 'voted for', thing);
+  }
+
+  #setSuggestions(things: string[]) {
+    this.#game.things = things;
+    console.log('suggestions so far:', things);
+  }
+
+  #setPlayers(players: ClientPlayer[]) {
+    this.#game.players = players;
+    console.log('current players:', players);
+  }
+
+  #setVotes(votes: AllVotesMsg) {
+    const [l, r] = Object.entries(votes) as [Thing, string[]][];
+    this.#votes.setVotes(l, r);
+    console.log('current votes:', votes);
   }
 
   #handleMsg(msg: OutMsg) {
@@ -206,6 +94,10 @@ export class GameClient {
         this.#newPlayer(msg.data);
         break;
 
+      case 'playerReady':
+        this.#playerReady(msg.data);
+        break;
+
       case 'playerLeft':
         this.#playerLeft(msg.data);
         break;
@@ -216,6 +108,14 @@ export class GameClient {
 
       case 'newSuggestion':
         this.#newSuggestion(msg.data);
+        break;
+
+      case 'gameStart':
+        this.#startGame();
+        break;
+
+      case 'gameInfo':
+        this.#updateInfo(msg.data.uniqueName);
         break;
 
       case 'roundStart':

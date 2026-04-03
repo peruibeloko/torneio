@@ -37,6 +37,18 @@ button {
   }
 }
 
+:disabled {
+  cursor: not-allowed;
+  color: gray;
+  border-color: gray;
+  background-color: lightgray;
+
+  &:hover {
+    background-color: lightgray;
+    color: gray;
+  }
+}
+
 li {
   font-family: monospace;
   font-size: 1.2rem;

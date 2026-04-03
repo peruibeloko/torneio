@@ -1,6 +1,9 @@
 <template>
   <header>
-    <h1>LOBBY (<span>{{ game.lobbyCode }}</span>)</h1>
+    <h1>
+      LOBBY (<span>{{ game.lobbyCode }}</span
+      >)
+    </h1>
   </header>
   <main>
     <div>
@@ -23,13 +26,22 @@
             type="text"
             placeholder="Qual sua sugestão?"
             v-model="suggestion"
+            :disabled="disabledInputs"
             @keydown="suggestOnEnter"
           />
-          <button type="button" @click="suggest">Enviar</button>
+          <button
+            type="button"
+            @click="suggest"
+            :disabled="disabledInputs || debounce"
+          >
+            Enviar
+          </button>
         </div>
       </section>
     </div>
-    <button id="ready" @click="game.ready">ESTOU PRONTO!</button>
+    <button id="ready" @click="handleReady" :disabled="disabledInputs">
+      ESTOU PRONTO!
+    </button>
   </main>
 </template>
 
@@ -43,12 +55,21 @@ const game = useGameStore();
 const router = useRouter();
 
 const suggestion = ref('');
+const disabledInputs = ref(false);
+const debounce = ref(false);
+
+const handleReady = () => {
+  disabledInputs.value = true;
+  game.ready();
+};
+
+// TODO better debouncing for suggestions
 
 const suggest = () => {
-  console.log('suggesting', suggestion.value);
-
+  debounce.value = true;
   game.suggest(suggestion.value);
   suggestion.value = '';
+  debounce.value = false;
 };
 const suggestOnEnter = onEnter(suggest);
 

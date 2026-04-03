@@ -3,10 +3,10 @@
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
     "dev": "deno task dev:api && deno task dev:vite",
-    "dev:api": "wt deno serve --allow-env --allow-net server.ts",
+    "dev:api": "wt deno serve --allow-env --allow-net ./src/server.ts",
     "dev:vite": "wt deno run -A npm:vite",
     "build": "vite build",
-    "server:start": "deno serve -A --watch ./server.ts",
+    "server:start": "deno serve -A --watch ./src/server.ts",
     "serve": "deno run build && deno run server:start",
     "preview": "vite preview"
   },

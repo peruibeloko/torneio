@@ -7,7 +7,8 @@
       type="text"
       placeholder="Como quer ser chamado?"
       :disabled="disableButtons"
-      v-model="internal.playerName"
+      v-model.trim="internal.playerName"
+      required
     />
     <section>
       <div class="side">
@@ -17,14 +18,15 @@
             :disabled="disableButtons"
             type="text"
             placeholder="Código de sala"
-            v-model="internal.lobbyCode"
+            v-model.trim="internal.lobbyCode"
             @keydown="onEnter(joinLobby)"
+            required
           />
           <button
             id="joinLobby"
             type="button"
             @click="joinLobby"
-            :disabled="disableButtons"
+            :disabled="disableButtons || !isCodeValid"
           >
             Entrar
           </button>
@@ -36,7 +38,7 @@
         <button
           id="createLobby"
           @click="createLobby"
-          :disabled="disableButtons"
+          :disabled="disableButtons || !isNameValid"
         >
           Criar
         </button>
@@ -50,14 +52,20 @@ import { useRouter } from 'vue-router';
 import { onEnter } from '../composables/enter.ts';
 import { useGameStore } from '../stores/game.ts';
 import { useGameInternalStore } from '../stores/gameInternal.ts';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const router = useRouter();
 const game = useGameStore();
 const internal = useGameInternalStore();
 const disableButtons = ref(false);
 
+const isCodeValid = computed(() => /[A-Z]{6}/.test(internal.lobbyCode));
+const isNameValid = computed(() => internal.playerName.length > 0);
+
 const joinLobby = async () => {
+  if (!isCodeValid) return false;
+  if (!isNameValid) return false;
+
   disableButtons.value = true;
   const stage = await game.joinLobby(internal.playerName, internal.lobbyCode);
   if (stage === 'lobby') return router.push({ name: 'lobby' });
@@ -65,6 +73,8 @@ const joinLobby = async () => {
 };
 
 const createLobby = async () => {
+  if (!isNameValid) return false;
+
   disableButtons.value = true;
   const lobbyCode = await game.createLobby();
   await game.joinLobby(internal.playerName, lobbyCode);

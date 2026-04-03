@@ -25,21 +25,26 @@
           <input
             type="text"
             placeholder="Qual sua sugestão?"
-            v-model="suggestion"
+            v-model.trim="suggestion"
             :disabled="disabledInputs"
             @keydown="suggestOnEnter"
+            required
           />
           <button
             type="button"
             @click="suggest"
-            :disabled="disabledInputs || debounce"
+            :disabled="disabledInputs || suggestion.length === 0"
           >
             Enviar
           </button>
         </div>
       </section>
     </div>
-    <button id="ready" @click="handleReady" :disabled="disabledInputs">
+    <button
+      id="ready"
+      @click="handleReady"
+      :disabled="disabledInputs || game.things.length < 2"
+    >
       ESTOU PRONTO!
     </button>
   </main>
@@ -56,20 +61,15 @@ const router = useRouter();
 
 const suggestion = ref('');
 const disabledInputs = ref(false);
-const debounce = ref(false);
 
 const handleReady = () => {
   disabledInputs.value = true;
   game.ready();
 };
 
-// TODO better debouncing for suggestions
-
 const suggest = () => {
-  debounce.value = true;
   game.suggest(suggestion.value);
   suggestion.value = '';
-  debounce.value = false;
 };
 const suggestOnEnter = onEnter(suggest);
 

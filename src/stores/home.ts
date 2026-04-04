@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useGameInternalStore } from '@/stores/internal.ts';
-import { JoinMsg } from '@/game/client/ClientMessages.ts';
-import { GameInfo, GameStages } from '@/game/shared/constants.ts';
+import type { JoinMsg } from '@/game/client/ClientMessages.ts';
+import type { GameInfo, GameStages } from '@/game/shared/constants.ts';
 
 export const useHomeStore = defineStore('home', () => {
   const internal = useGameInternalStore();

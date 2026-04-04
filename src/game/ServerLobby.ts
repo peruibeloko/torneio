@@ -1,6 +1,7 @@
-import { GameState, OutMsg, ServerPlayer, Thing } from '@/game/shared/constants.ts';
+import { GameState, ServerPlayer, Thing } from '@/game/shared/constants.ts';
 import { Tournament } from '@/game/Tournament.ts';
 import { ServerVotes } from '@/game/ServerVotes.ts';
+import { OutMsg } from '@/game/server/ServerMessages.ts';
 
 export class ServerLobby {
   #lobbyCode: string;
@@ -139,7 +140,7 @@ export class ServerLobby {
 
     this.#shoutMsg({
       type: 'newVote',
-      data: { lobbyCode: this.#lobbyCode, player, thing }
+      data: { player, thing }
     });
 
     this.#state.votes.vote(thing, player);
@@ -147,7 +148,7 @@ export class ServerLobby {
 
     console.log('total votes', this.#state.totalVotes);
     console.log('total players', this.#players.size);
-    
+
     if (this.#state.totalVotes === this.#players.size) this.endRound();
   }
 

@@ -1,11 +1,7 @@
-import type {
-  AllVotesMsg,
-  ClientPlayer,
-  OutMsg,
-  Thing
-} from '@/game/shared/constants.ts';
+import type { ClientPlayer, Thing } from '@/game/shared/constants.ts';
 import { useGameInternalStore } from '@/stores/gameInternal.ts';
 import { useVotesInternalStore } from '@/stores/votesInternal.ts';
+import { AllVotesMsg, OutMsg } from "@/game/server/ServerMessages.ts";
 
 export class GameClient {
   #game = useGameInternalStore();

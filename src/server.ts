@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { serveStatic, upgradeWebSocket } from 'hono/deno';
 // import { cors } from "hono/cors";
 import { GameServer } from '@/game/GameServer.ts';
-import { JoinMsg } from '@/game/shared/constants.ts';
+import { JoinMsg } from "@/game/client/ClientMessages.ts";
 
 const gameServer = new GameServer();
 

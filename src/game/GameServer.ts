@@ -1,5 +1,7 @@
-import type { InMsg, OutMsg, ServerPlayer, Thing } from '@/game/shared/constants.ts';
+import type { ServerPlayer, Thing } from '@/game/shared/constants.ts';
 import { ServerLobby } from '@/game/ServerLobby.ts';
+import { InMsg } from '@/game/client/ClientMessages.ts';
+import { OutMsg } from '@/game/server/ServerMessages.ts';
 
 type Lobbies = Map<string, ServerLobby>;
 

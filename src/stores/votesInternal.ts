@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
-import type { AllVotesMsg, Thing } from '@/game/shared/constants.ts';
+import type { Thing } from '@/game/shared/constants.ts';
 import { ref } from 'vue';
 import { computed } from 'vue';
+import { AllVotesMsg } from "@/game/server/ServerMessages.ts";
 
 export const useVotesInternalStore = defineStore('votesInternal', () => {
   const thingL = ref('' as Thing);

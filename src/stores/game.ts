@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-import type { GameInfo, GameStages, JoinMsg, Thing } from '@/game/shared/constants.ts';
+import type { GameInfo, GameStages, Thing } from '@/game/shared/constants.ts';
 import { useGameInternalStore } from '@/stores/gameInternal.ts';
 import { useVotesInternalStore } from '@/stores/votesInternal.ts';
+import { JoinMsg } from "@/game/client/ClientMessages.ts";
 
 export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();

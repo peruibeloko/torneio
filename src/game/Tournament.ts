@@ -1,5 +1,5 @@
-import { Thing } from '@/src/game/constants.ts';
-import { ServerVotes } from './ServerVotes.ts';
+import { Thing } from '@/game/shared/constants.ts';
+import { ServerVotes } from '@/game/ServerVotes.ts';
 
 export class Tournament {
   #round: number;

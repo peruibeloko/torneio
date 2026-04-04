@@ -1,6 +1,6 @@
-import { GameState, OutMsg, ServerPlayer, Thing } from '@/src/game/constants.ts';
-import { Tournament } from '@/src/game/Tournament.ts';
-import { ServerVotes } from './ServerVotes.ts';
+import { GameState, OutMsg, ServerPlayer, Thing } from '@/game/shared/constants.ts';
+import { Tournament } from '@/game/Tournament.ts';
+import { ServerVotes } from '@/game/ServerVotes.ts';
 
 export class ServerLobby {
   #lobbyCode: string;

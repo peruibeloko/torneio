@@ -16,7 +16,7 @@
     }
   },
   "imports": {
-    "@/": "./",
+    "@/": "./src/",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
     "@tsconfig/node24": "npm:@tsconfig/node24@^24.0.4",
     "@vue/tsconfig": "npm:@vue/tsconfig@^0.9.1",

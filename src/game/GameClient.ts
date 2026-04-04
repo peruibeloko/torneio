@@ -3,9 +3,9 @@ import type {
   ClientPlayer,
   OutMsg,
   Thing
-} from '@/src/game/constants.ts';
-import { useGameInternalStore } from '../stores/gameInternal.ts';
-import { useVotesInternalStore } from '../stores/votesInternal.ts';
+} from '@/game/shared/constants.ts';
+import { useGameInternalStore } from '@/stores/gameInternal.ts';
+import { useVotesInternalStore } from '@/stores/votesInternal.ts';
 
 export class GameClient {
   #game = useGameInternalStore();

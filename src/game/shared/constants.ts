@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import { ServerVotes } from './ServerVotes.ts';
+import { ServerVotes } from "@/game/ServerVotes.ts";
 
 declare const tags: unique symbol;
 

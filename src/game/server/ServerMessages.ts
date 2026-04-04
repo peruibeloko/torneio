@@ -1,4 +1,4 @@
-import { GameStages, Thing } from "@/game/shared/constants.ts";
+import type { GameStages } from "@/game/shared/constants.ts";
 
 export type OutMsg =
   | { type: 'allPlayers'; data: AllPlayersMsg }
@@ -22,8 +22,8 @@ export type OutMsg =
 export type AllSuggestionsMsg = string[];
 
 export interface AllVotesMsg {
-  thingL: Thing;
-  thingR: Thing;
+  thingL: string;
+  thingR: string;
   votesL: string[];
   votesR: string[];
 }
@@ -34,7 +34,7 @@ export interface GameInfoMsg {
 }
 
 export interface RoundStartMsg {
-  things: [Thing, Thing];
+  things: [string, string];
   round: number;
 }
 
@@ -45,5 +45,5 @@ export interface RoundEndMsg {
 
 export type VoteMsg = {
   player: string;
-  thing: Thing;
+  thing: string;
 };

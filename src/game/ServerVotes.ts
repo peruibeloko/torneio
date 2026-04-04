@@ -1,12 +1,10 @@
-import type { Thing } from '@/game/shared/constants.ts';
-
 export class ServerVotes {
-  #thingL = '' as Thing;
-  #thingR = '' as Thing;
-  #votesL = new Set() as Set<string>;
-  #votesR = new Set() as Set<string>;
+  #thingL = '';
+  #thingR = '';
+  #votesL = new Set<string>();
+  #votesR = new Set<string>();
 
-  constructor(thingL: Thing, thingR: Thing) {
+  constructor(thingL: string, thingR: string) {
     this.#thingL = thingL;
     this.#thingR = thingR;
   }
@@ -32,18 +30,18 @@ export class ServerVotes {
   }
 
   reset() {
-    this.#thingL = '' as Thing;
-    this.#thingR = '' as Thing;
+    this.#thingL = '';
+    this.#thingR = '';
     this.#votesL = new Set();
     this.#votesR = new Set();
   }
 
-  setThing(which: 'l' | 'r', thing: Thing) {
+  setThing(which: 'l' | 'r', thing: string) {
     if (which === 'l') this.#thingL = thing;
     else this.#thingR = thing;
   }
 
-  vote(thing: Thing, player: string) {
+  vote(thing: string, player: string) {
     if (thing === this.#thingL) {
       this.#votesR.delete(player);
       this.#votesL.add(player);
@@ -54,7 +52,7 @@ export class ServerVotes {
     this.#votesR.add(player);
   }
 
-  setVotes(thingL: Thing, votesL: string[], thingR: Thing, votesR: string[]) {
+  setVotes(thingL: string, votesL: string[], thingR: string, votesR: string[]) {
     this.#thingL = thingL;
     this.#thingR = thingR;
     this.#votesL = new Set(votesL);

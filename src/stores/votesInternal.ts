@@ -1,15 +1,13 @@
+import type { AllVotesMsg } from "@/game/server/ServerMessages.ts";
 import { defineStore } from 'pinia';
-import type { Thing } from '@/game/shared/constants.ts';
-import { ref } from 'vue';
-import { computed } from 'vue';
-import { AllVotesMsg } from "@/game/server/ServerMessages.ts";
+import { computed, ref } from 'vue';
 
 export const useVotesInternalStore = defineStore('votesInternal', () => {
-  const thingL = ref('' as Thing);
-  const thingR = ref('' as Thing);
+  const thingL = ref('');
+  const thingR = ref('');
 
-  const votesL = ref(new Set() as Set<string>);
-  const votesR = ref(new Set() as Set<string>);
+  const votesL = ref(new Set<string>());
+  const votesR = ref(new Set<string>());
 
   const votes = computed(() => ({
     [thingL.value]: votesL.value.values().toArray(),
@@ -17,18 +15,18 @@ export const useVotesInternalStore = defineStore('votesInternal', () => {
   }));
 
   function reset() {
-    thingL.value = '' as Thing;
-    thingR.value = '' as Thing;
+    thingL.value = '';
+    thingR.value = '';
     votesL.value = new Set();
     votesR.value = new Set();
   }
 
-  function setThings([left, right]: [Thing, Thing]) {
+  function setThings([left, right]: [string, string]) {
     thingL.value = left;
     thingR.value = right;
   }
 
-  function vote(thing: Thing, player: string) {
+  function vote(thing: string, player: string) {
     if (thing === thingL.value) {
       votesR.value.delete(player);
       votesL.value.add(player);

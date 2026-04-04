@@ -1,8 +1,6 @@
 import type { Ref } from 'vue';
 import { ServerVotes } from "@/game/ServerVotes.ts";
 
-declare const tags: unique symbol;
-
 export type ServerPlayer = {
   ready: boolean;
   socket: WebSocket;
@@ -13,9 +11,7 @@ export interface ClientPlayer {
   ready: boolean;
 }
 
-export type Thing = string & { [tags]: { Thing: void } };
-
-export type ClientVotes = { [thing: Thing]: Ref<string[]> };
+export type ClientVotes = { [thing: string]: Ref<string[]> };
 
 export type GameState =
   | { stage: 'lobby'; things: string[]; remainingReady: number }

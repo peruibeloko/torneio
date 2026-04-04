@@ -1,5 +1,3 @@
-import { Thing } from '@/game/shared/constants.ts';
-
 type CltMsg = {
   lobbyCode: string;
 };
@@ -30,5 +28,5 @@ export type ReadyMsg = {
 
 export type VoteMsg = {
   player: string;
-  thing: Thing;
+  thing: string;
 } & CltMsg;

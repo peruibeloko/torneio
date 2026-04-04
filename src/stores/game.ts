@@ -1,9 +1,9 @@
-import { defineStore } from 'pinia';
-import { computed } from 'vue';
-import type { GameInfo, GameStages, Thing } from '@/game/shared/constants.ts';
+import type { JoinMsg } from '@/game/client/ClientMessages.ts';
+import type { GameInfo, GameStages } from '@/game/shared/constants.ts';
 import { useGameInternalStore } from '@/stores/gameInternal.ts';
 import { useVotesInternalStore } from '@/stores/votesInternal.ts';
-import { JoinMsg } from "@/game/client/ClientMessages.ts";
+import { defineStore } from 'pinia';
+import { computed } from 'vue';
 
 export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();
@@ -93,7 +93,7 @@ export const useGameStore = defineStore('game', () => {
     console.log(internal.playerName, 'is ready');
   }
 
-  function vote(thing: Thing) {
+  function vote(thing: string) {
     votesInternal.vote(thing, internal.playerName);
     internal.sendMsg({
       type: 'vote',

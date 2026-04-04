@@ -1,7 +1,7 @@
-import type { ServerPlayer, Thing } from '@/game/shared/constants.ts';
 import { ServerLobby } from '@/game/ServerLobby.ts';
-import { InMsg } from '@/game/client/ClientMessages.ts';
-import { OutMsg } from '@/game/server/ServerMessages.ts';
+import type { InMsg } from '@/game/client/ClientMessages.ts';
+import type { OutMsg } from '@/game/server/ServerMessages.ts';
+import type { ServerPlayer } from '@/game/shared/constants.ts';
 
 type Lobbies = Map<string, ServerLobby>;
 
@@ -76,7 +76,7 @@ export class GameServer {
     this.getLobby(lobbyCode).playerReady(player);
   }
 
-  voteFor(lobbyCode: string, thing: Thing, player: string) {
+  voteFor(lobbyCode: string, thing: string, player: string) {
     this.getLobby(lobbyCode).voteFor(thing, player);
   }
 

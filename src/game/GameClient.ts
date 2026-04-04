@@ -1,7 +1,7 @@
-import type { ClientPlayer, Thing } from '@/game/shared/constants.ts';
+import type { AllVotesMsg, OutMsg } from "@/game/server/ServerMessages.ts";
+import type { ClientPlayer } from '@/game/shared/constants.ts';
 import { useGameInternalStore } from '@/stores/gameInternal.ts';
 import { useVotesInternalStore } from '@/stores/votesInternal.ts';
-import { AllVotesMsg, OutMsg } from "@/game/server/ServerMessages.ts";
 
 export class GameClient {
   #game = useGameInternalStore();
@@ -21,7 +21,7 @@ export class GameClient {
     this.#game.gameStartCallback();
   }
 
-  #startRound(things: [Thing, Thing], round: number) {
+  #startRound(things: [string, string], round: number) {
     this.#game.round = round;
 
     this.#votes.reset();
@@ -51,7 +51,7 @@ export class GameClient {
 
   #playerReady(name: string) {
     const idx = this.#game.players.findIndex(p => p.name === name);
-    this.#game.players[idx].ready = true;
+    this.#game.players[idx]!.ready = true;
   }
 
   #playerLeft(name: string) {
@@ -60,7 +60,7 @@ export class GameClient {
     console.log(name, 'left');
   }
 
-  #newVote(player: string, thing: Thing) {
+  #newVote(player: string, thing: string) {
     this.#votes.vote(thing, player);
     console.log(player, 'voted for', thing);
   }

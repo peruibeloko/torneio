@@ -1,7 +1,7 @@
-import { GameState, ServerPlayer, Thing } from '@/game/shared/constants.ts';
-import { Tournament } from '@/game/Tournament.ts';
+import type { OutMsg } from '@/game/server/ServerMessages.ts';
 import { ServerVotes } from '@/game/ServerVotes.ts';
-import { OutMsg } from '@/game/server/ServerMessages.ts';
+import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
+import { Tournament } from '@/game/Tournament.ts';
 
 export class ServerLobby {
   #lobbyCode: string;
@@ -135,7 +135,7 @@ export class ServerLobby {
     if (this.#state.remainingReady === 0) this.startGame();
   }
 
-  voteFor(thing: Thing, player: string) {
+  voteFor(thing: string, player: string) {
     if (this.#state.stage !== 'game') return;
 
     this.#shoutMsg({
@@ -155,7 +155,7 @@ export class ServerLobby {
   startGame() {
     if (this.#state.stage !== 'lobby') return;
     console.log('starting game');
-    this.#tournament.setup(this.#state.things as Thing[]);
+    this.#tournament.setup(this.#state.things as string[]);
     this.#shoutMsg({ type: 'gameStart' });
     this.startRound();
   }

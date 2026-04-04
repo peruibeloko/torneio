@@ -1,4 +1,3 @@
-import { SERVFAIL } from 'node:dns';
 import type { Thing } from './constants.ts';
 
 export class ServerVotes {

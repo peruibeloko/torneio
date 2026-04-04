@@ -1,13 +1,15 @@
-import type { AllVotesMsg, OutMsg } from "@/game/server/ServerMessages.ts";
+import type { AllVotesMsg, OutMsg } from '@/game/server/ServerMessages.ts';
 import type { ClientPlayer } from '@/game/shared/constants.ts';
-import { useGameInternalStore } from '@/stores/gameInternal.ts';
-import { useVotesInternalStore } from '@/stores/votesInternal.ts';
+import { voteState } from '@/game/shared/votes.ts';
+import { useGameInternalStore } from '@/stores/internal.ts';
 
 export class GameClient {
   #game = useGameInternalStore();
-  #votes = useVotesInternalStore();
+  #votes = voteState();
 
-  constructor() {
+  constructor() {}
+
+  setup() {
     this.#game.socket.addEventListener('message', e =>
       this.#handleMsg(JSON.parse(e.data))
     );
@@ -25,11 +27,10 @@ export class GameClient {
     this.#game.round = round;
 
     this.#votes.reset();
-    this.#votes.thingL = things[0];
-    this.#votes.thingR = things[1];
+    this.#votes.setThings(things);
 
     this.#game.roundStartCallback();
-    console.log('new round', this.#votes.thingL, this.#votes.thingR);
+    console.log('new round', this.#votes.thingsTuple);
   }
 
   #endRound(winner: string, gameEnd: boolean) {
@@ -75,9 +76,11 @@ export class GameClient {
     console.log('current players:', players);
   }
 
-  #setVotes(votes: AllVotesMsg) {
-    this.#votes.setAll(votes);
-    console.log('current votes:', votes);
+  #setVotes({ things, votes }: AllVotesMsg) {
+    this.#votes.setThings(things);
+    this.#votes.setVotes(votes);
+
+    console.log('current votes:', { things, votes });
   }
 
   #handleMsg(msg: OutMsg) {

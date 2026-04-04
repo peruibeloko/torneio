@@ -11,30 +11,33 @@
 
   <main>
     <section>
-      <span>{{ internal.thingL }}</span>
+      <span>{{ thingsTuple[0] }}</span>
       <button @click="voteL" :disabled="disabledL">VOTAR</button>
       <ul>
-        <li v-for="v in internal.votesL" :key="v">{{ v }}</li>
+        <li v-for="v in votesTuple[0]" :key="v">{{ v }}</li>
       </ul>
     </section>
     <div className="vbar"></div>
     <section>
-      <span>{{ internal.thingR }}</span>
+      <span>{{ thingsTuple[1] }}</span>
       <button @click="voteR" :disabled="disabledR">VOTAR</button>
       <ul>
-        <li v-for="v in internal.votesR" :key="v">{{ v }}</li>
+        <li v-for="v in votesTuple[1]" :key="v">{{ v }}</li>
       </ul>
     </section>
   </main>
 </template>
 
 <script lang="ts" setup>
+import { voteState } from '@/game/shared/votes';
 import { ref, useTemplateRef } from 'vue';
-import { useGameStore } from '../stores/game';
-import { useVotesInternalStore } from '../stores/votesInternal';
+import { useGameStore } from '@/stores/game';
 
 const game = useGameStore();
-const internal = useVotesInternalStore();
+
+const votes = voteState();
+const thingsTuple = votes.thingsTuple;
+const votesTuple = votes.votesTuple;
 
 const disabledL = ref(false);
 const disabledR = ref(false);
@@ -52,13 +55,13 @@ game.roundStartLogic(() => {
 });
 
 const voteL = () => {
-  game.vote(internal.thingL);
+  game.vote(thingsTuple.value[0]);
   disabledL.value = true;
   disabledR.value = false;
 };
 
 const voteR = () => {
-  game.vote(internal.thingR);
+  game.vote(thingsTuple.value[1]);
   disabledL.value = false;
   disabledR.value = true;
 };

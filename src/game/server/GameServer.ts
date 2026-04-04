@@ -1,5 +1,5 @@
-import { ServerLobby } from '@/game/ServerLobby.ts';
-import type { InMsg } from '@/game/client/ClientMessages.ts';
+import { ServerLobby } from '@/game/server/ServerLobby.ts';
+import type { ClientMessage } from '@/game/client/ClientMessages.ts';
 import type { OutMsg } from '@/game/server/ServerMessages.ts';
 import type { ServerPlayer } from '@/game/shared/constants.ts';
 
@@ -91,7 +91,7 @@ export class GameServer {
     socket.send(JSON.stringify(msg));
   }
 
-  handleMsg(msg: InMsg, socket: WebSocket) {
+  handleMsg(msg: ClientMessage, socket: WebSocket) {
     console.log('new message', msg);
 
     switch (msg.type) {

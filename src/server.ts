@@ -1,8 +1,7 @@
 import { Hono } from 'hono';
 import { serveStatic, upgradeWebSocket } from 'hono/deno';
-// import { cors } from "hono/cors";
-import { GameServer } from '@/game/GameServer.ts';
-import { JoinMsg } from "@/game/client/ClientMessages.ts";
+import { JoinMsg } from '@/game/client/ClientMessages.ts';
+import { GameServer } from '@/game/server/GameServer.ts';
 
 const gameServer = new GameServer();
 
@@ -32,10 +31,6 @@ api.get(
 const app = new Hono();
 
 app.route('/api', api);
-
-// app.use(cors({
-//   origin: ["localhost:5137"],
-// }));
 
 app.use('/assets/*', serveStatic({ root: './dist' }));
 app.use('/', serveStatic({ path: './dist/index.html' }));

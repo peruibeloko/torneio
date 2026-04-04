@@ -1,8 +1,4 @@
-type CltMsg = {
-  lobbyCode: string;
-};
-
-export type InMsg =
+export type ClientMessage =
   | { type: 'create' }
   | { type: 'join'; data: JoinMsg }
   | { type: 'leave'; data: LeaveMsg }
@@ -10,23 +6,27 @@ export type InMsg =
   | { type: 'ready'; data: ReadyMsg }
   | { type: 'vote'; data: VoteMsg };
 
+type ClientMessageBase = {
+  lobbyCode: string;
+};
+
 export type JoinMsg = {
   player: string;
-} & CltMsg;
+} & ClientMessageBase;
 
 export type LeaveMsg = {
   player: string;
-} & CltMsg;
+} & ClientMessageBase;
 
 export type SuggestMsg = {
   thing: string;
-} & CltMsg;
+} & ClientMessageBase;
 
 export type ReadyMsg = {
   player: string;
-} & CltMsg;
+} & ClientMessageBase;
 
 export type VoteMsg = {
   player: string;
   thing: string;
-} & CltMsg;
+} & ClientMessageBase;

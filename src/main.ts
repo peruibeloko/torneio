@@ -1,9 +1,9 @@
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import App from './App.vue';
-import { GameClient } from './game/GameClient.ts';
+import { GameClient } from '@/game/client/GameClient.ts';
 import { router } from './router.ts';
-import { useGameInternalStore } from './stores/gameInternal.ts';
+import { useGameInternalStore } from '@/stores/internal.ts';
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -14,4 +14,4 @@ app.mount('#app');
 
 const internalGame = useGameInternalStore();
 internalGame.socket = new WebSocket('/api/game');
-new GameClient();
+new GameClient().setup();

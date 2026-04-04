@@ -2,6 +2,8 @@
   "version": "5",
   "specifiers": {
     "jsr:@hono/hono@^4.12.9": "4.12.9",
+    "jsr:@std/internal@^1.0.12": "1.0.12",
+    "jsr:@std/path@^1.1.4": "1.1.4",
     "npm:@deno/vite-plugin@^2.0.2": "2.0.2_vite@8.0.3__@emnapi+core@1.9.1__@emnapi+runtime@1.9.1_@emnapi+core@1.9.1_@emnapi+runtime@1.9.1",
     "npm:@tsconfig/node24@^24.0.4": "24.0.4",
     "npm:@vitejs/plugin-vue@^6.0.5": "6.0.5_vite@8.0.3__@emnapi+core@1.9.1__@emnapi+runtime@1.9.1_vue@3.5.31__typescript@6.0.2_@emnapi+core@1.9.1_@emnapi+runtime@1.9.1",
@@ -15,6 +17,15 @@
   "jsr": {
     "@hono/hono@4.12.9": {
       "integrity": "53c2b0a721c1d782e6a347ad5bf15a3235ff624b98859c21f779b7ee2f5e040e"
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    },
+    "@std/path@1.1.4": {
+      "integrity": "1d2d43f39efb1b42f0b1882a25486647cb851481862dc7313390b2bb044314b5",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
     }
   },
   "npm": {
@@ -813,6 +824,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@hono/hono@^4.12.9",
+      "jsr:@std/path@^1.1.4",
       "npm:@deno/vite-plugin@^2.0.2",
       "npm:@tsconfig/node24@^24.0.4",
       "npm:@vitejs/plugin-vue@^6.0.5",

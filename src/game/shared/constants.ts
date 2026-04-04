@@ -1,5 +1,4 @@
-import type { Ref } from 'vue';
-import { ServerVotes } from "@/game/ServerVotes.ts";
+import type { Votes } from '@/game/shared/votes.ts';
 
 export type ServerPlayer = {
   ready: boolean;
@@ -11,7 +10,7 @@ export interface ClientPlayer {
   ready: boolean;
 }
 
-export type ClientVotes = { [thing: string]: Ref<string[]> };
+export type VotesDict = { [thing: string]: Set<string> };
 
 export type GameState =
   | { stage: 'lobby'; things: string[]; remainingReady: number }
@@ -20,7 +19,7 @@ export type GameState =
       stage: 'game';
       round: number;
       totalVotes: number;
-      votes: ServerVotes;
+      votes: Votes;
     };
 
 export type GameStages = GameState['stage'];
@@ -29,7 +28,3 @@ export interface GameInfo {
   uniqueName: string;
   stage: GameStages;
 }
-
-
-
-

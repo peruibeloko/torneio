@@ -1,15 +1,12 @@
-import type { JoinMsg } from '@/game/client/ClientMessages.ts';
-import type { GameInfo, GameStages } from '@/game/shared/constants.ts';
-import { useGameInternalStore } from '@/stores/gameInternal.ts';
-import { useVotesInternalStore } from '@/stores/votesInternal.ts';
+import { voteState } from '@/game/shared/votes.ts';
+import { useGameInternalStore } from '@/stores/internal.ts';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
 
 export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();
-  const votesInternal = useVotesInternalStore();
+  const votes = voteState();
 
-  const lobbyCode = computed(() => internal.lobbyCode);
   const playerName = computed(() => internal.playerName);
 
   const players = computed(() => internal.players);
@@ -18,53 +15,12 @@ export const useGameStore = defineStore('game', () => {
   const winner = computed(() => internal.winner);
   const gameEnd = computed(() => internal.isGameEnd);
 
-  function roundStartLogic(cb: () => void) {
+  function setRoundStartLogic(cb: () => void) {
     internal.roundStartCallback = cb;
   }
 
-  function roundEndLogic(cb: () => void) {
+  function setRoundEndLogic(cb: () => void) {
     internal.roundEndCallback = cb;
-  }
-
-  function gameStartLogic(cb: () => void) {
-    internal.gameStartCallback = cb;
-  }
-
-  async function createLobby() {
-    const lobbyCode = await fetch('/api/createLobby', { method: 'POST' }).then(
-      r => r.text()
-    );
-    console.log('created lobby', lobbyCode);
-    return lobbyCode;
-  }
-
-  async function joinLobby(name: string, lobbyCode: string) {
-    internal.lobbyCode = lobbyCode;
-
-    // TODO check if lobby exists
-    const gameInfo: GameInfo = await fetch('/api/joinLobby', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        player: name,
-        lobbyCode: internal.lobbyCode
-      } as JoinMsg)
-    }).then(r => r.json());
-
-    internal.playerName = gameInfo.uniqueName;
-
-    internal.sendMsg({
-      type: 'join',
-      data: {
-        lobbyCode: internal.lobbyCode,
-        player: internal.playerName
-      }
-    });
-
-    console.log(internal.playerName, 'joined lobby', internal.lobbyCode);
-    return gameInfo.stage as GameStages;
   }
 
   function leaveLobby() {
@@ -74,27 +30,8 @@ export const useGameStore = defineStore('game', () => {
     });
   }
 
-  function suggest(thing: string) {
-    internal.sendMsg({
-      type: 'suggest',
-      data: { thing, lobbyCode: internal.lobbyCode }
-    });
-    console.log('suggesting', thing);
-  }
-
-  function ready() {
-    internal.sendMsg({
-      type: 'ready',
-      data: {
-        lobbyCode: internal.lobbyCode,
-        player: internal.playerName
-      }
-    });
-    console.log(internal.playerName, 'is ready');
-  }
-
   function vote(thing: string) {
-    votesInternal.vote(thing, internal.playerName);
+    votes.vote(thing, internal.playerName);
     internal.sendMsg({
       type: 'vote',
       data: {
@@ -107,21 +44,16 @@ export const useGameStore = defineStore('game', () => {
   }
 
   return {
-    lobbyCode,
+    lobbyCode: internal.lobbyCode,
     playerName,
     players,
     things,
     round,
     winner,
     gameEnd,
-    roundStartLogic,
-    roundEndLogic,
-    gameStartLogic,
-    createLobby,
-    joinLobby,
+    roundStartLogic: setRoundStartLogic,
+    roundEndLogic: setRoundEndLogic,
     leaveLobby,
-    suggest,
-    ready,
     vote
   };
 });

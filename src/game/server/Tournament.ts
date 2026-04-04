@@ -1,14 +1,13 @@
-import { Thing } from '@/game/shared/constants.ts';
-import { ServerVotes } from '@/game/ServerVotes.ts';
+import { ThingTuple, VotesTuple } from '@/game/shared/votes.ts';
 
 export class Tournament {
   #round: number;
-  #contestants: Thing[];
-  #winner: Thing;
+  #contestants: string[];
+  #winner: string;
 
   constructor() {
     this.#contestants = [];
-    this.#winner = '' as Thing;
+    this.#winner = '';
     this.#round = 0;
   }
 
@@ -29,7 +28,7 @@ export class Tournament {
     return out;
   }
 
-  setup(things: Thing[]) {
+  setup(things: string[]) {
     this.#contestants = this.#shuffleArray(things);
   }
 
@@ -39,15 +38,14 @@ export class Tournament {
     const l = this.#winner ? this.#winner : this.#contestants.pop()!;
     const r = this.#contestants.pop()!;
 
-    return [l, r] as [Thing, Thing];
+    return [l, r] as [string, string];
   }
 
-  handleMatchEnd(votes: ServerVotes) {
-    const allVotes = votes.votes;
-    const [thingL, thingR] = votes.things;
+  handleMatchEnd([things, votes]: [ThingTuple, VotesTuple]) {
+    const [thingL, thingR] = things;
 
-    const votesL = allVotes[thingL].length;
-    const votesR = allVotes[thingR].length;
+    const votesL = votes[0].length;
+    const votesR = votes[1].length;
 
     // handle ties
     if (votesL === votesR) {

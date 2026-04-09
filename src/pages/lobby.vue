@@ -1,52 +1,54 @@
 <template>
   <header>
-    <h1>
-      LOBBY (<span>{{ game.lobbyCode }}</span
-      >)
+    <h1 class="fancytext_big">
+      LOBBY - <span>{{ game.lobbyCode }}</span>
     </h1>
   </header>
   <main>
-    <div>
-      <section>
-        <h2>Jogadores</h2>
-        <ul>
-          <li v-for="p in game.players" :key="p.name">
-            {{ p.name }}{{ p.ready ? '🟩' : '🟥' }}
-          </li>
-        </ul>
-      </section>
-      <div className="vbar"></div>
-      <section>
-        <h2>Coisas</h2>
-        <ul class="things">
-          <li v-for="t in game.things" :key="t">{{ t }}</li>
-        </ul>
-        <div className="inputGroup">
-          <input
-            type="text"
-            placeholder="Qual sua sugestão?"
-            v-model.trim="suggestion"
-            :disabled="disabledInputs"
-            @keydown="suggestOnEnter"
-            required
-          />
-          <button
-            type="button"
-            @click="suggest"
-            :disabled="disabledInputs || suggestion.length === 0"
-          >
-            Enviar
-          </button>
-        </div>
-      </section>
-    </div>
-    <button
-      id="ready"
-      @click="handleReady"
-      :disabled="disabledInputs || game.things.length < 2"
-    >
-      ESTOU PRONTO!
-    </button>
+    <section class="players">
+      <h2 class="fancytext_small">Jogadores</h2>
+      <ul>
+        <li v-for="p in game.players" :key="p.name">
+          {{ p.ready ? '🟩' : '🟥' }} {{ p.name }}
+        </li>
+        <li v-for="p in game.players" :key="p.name">
+          {{ p.ready ? '🟩' : '🟥' }} {{ p.name }}
+        </li>
+        <li v-for="p in game.players" :key="p.name">
+          {{ p.ready ? '🟩' : '🟥' }} {{ p.name }}
+        </li>
+      </ul>
+      <button
+        @click="handleReady"
+        :disabled="disabledInputs || game.things.length < 2"
+        class="ready"
+      >
+        {{isReady ? 'Aguardando jogadores...':  'Começar partida' }}
+      </button>
+    </section>
+    <section class="things">
+      <h2 class="fancytext_small">Coisas</h2>
+      <ul class="things">
+        <li v-for="t in game.things" :key="t">{{ t }}</li>
+      </ul>
+      <div className="inputGroup">
+        <input
+          type="text"
+          placeholder="Qual sua sugestão?"
+          v-model="suggestion"
+          :disabled="disabledInputs"
+          @keydown="suggestOnEnter"
+          required
+        />
+        <button
+          type="button"
+          @click="suggest"
+          :disabled="disabledInputs || suggestion.length === 0"
+        >
+          Enviar
+        </button>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -63,9 +65,11 @@ const router = useRouter();
 
 const suggestion = ref('');
 const disabledInputs = ref(false);
+const isReady = ref(false);
 
 const handleReady = () => {
   disabledInputs.value = true;
+  isReady.value = true;
   lobby.ready();
 };
 

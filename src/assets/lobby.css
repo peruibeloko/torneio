@@ -3,54 +3,56 @@ header h1 span {
 }
 
 main {
+  display: flex;
+  align-items: center;
+  gap: 5rem;
+}
+
+section {
+  width: 20rem;
+  display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  min-height: 30rem;
+  gap: 1rem;
+}
 
-  & > div {
-    display: flex;
-    flex-grow: 1;
+ul {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
 
-    section {
-      width: 20rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+  width: 100%;
+  height: 20rem;
+  border: var(--border);
+  border-radius: 1rem;
+
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--color__main) var(--color__bg);
+
+  background-color: var(--color__main_less);
+
+  li {
+    padding: 0.25rem 0.5rem;
   }
 
-  ul {
+  li:first-of-type {
+    padding-top: 0.5rem;
+  }
+
+  li:last-of-type {
+    padding-bottom: 0.5rem;
+  }
+
+  li:nth-of-type(even) {
     width: 100%;
-    height: 20rem;
-    border: 1px solid lightgray;
-    border-radius: 0.5rem;
-    margin-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-    padding: 0.5rem;
-    overflow-y: scroll;
-    scrollbar-width: thin;
+    background-color: hsla(200, 0%, 80%, 30%);
   }
+}
 
-  ul.things {
-    height: 17rem;
-  }
-
-  div.inputGroup {
-    margin-top: 1rem;
-  }
-
-  button#ready {
-    width: fit-content;
-    border-width: 5px;
-    font-weight: bold;
-    margin-top: 4rem;
-    font-size: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+button.ready {
+  border: var(--border);
+  font-weight: bold;
 }

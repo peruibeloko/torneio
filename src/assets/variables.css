@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Mono:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  --sans: 'Noto Sans', sans-serif;
+  --mono: 'Noto Sans Mono', monospace;
+
+  --color__main: oklch(27.542% 0.07159 249.571);
+  --color__main_less: oklch(71.1% 0.03908 244.67);
+  --color__bg: oklch(45.216% 0.04987 244.953);
+
+  --border: 3px solid var(--color__main);
+}

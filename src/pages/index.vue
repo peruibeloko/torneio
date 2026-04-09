@@ -1,6 +1,6 @@
 <template>
   <header>
-    <h1>BEM VINDO AO TORNEIO DAS COISAS</h1>
+    <h1 class="fancytext_big">BEM VINDO AO TORNEIO DAS COISAS</h1>
   </header>
   <main>
     <input
@@ -10,14 +10,14 @@
       v-model.trim="playerName"
       required
     />
-    <section>
+    <section class="join">
       <div class="side">
-        <h2>Entrar em uma sala</h2>
+        <h2 class="fancytext_small">Entrar em uma sala</h2>
         <div class="inputGroup">
           <input
             :disabled="disableButtons"
             type="text"
-            placeholder="Código de sala"
+            placeholder="ABCXYZ"
             v-model.trim="lobbyCode"
             @keydown="onEnter(joinLobby)"
             required
@@ -32,9 +32,9 @@
           </button>
         </div>
       </div>
-      <div class="vbar"></div>
+      <span>OU</span>
       <div class="side">
-        <h2>Criar uma nova sala</h2>
+        <h2 class="fancytext_small">Criar uma nova sala</h2>
         <button
           id="createLobby"
           @click="createLobby"
@@ -43,6 +43,16 @@
           Criar
         </button>
       </div>
+    </section>
+    <hr />
+    <section class="howto">
+      <h3 class="fancytext_small">Como que funciona?</h3>
+      <ol>
+        <li>Escolha seu nome</li>
+        <li>Entre ou crie uma sala</li>
+        <li>Envie sugestões</li>
+        <li>Vote</li>
+      </ol>
     </section>
   </main>
 </template>

@@ -1,28 +1,34 @@
 <template>
   <dialog ref="winnerModal" id="winner">
-    <h2>Vencedor{{ game.gameEnd ? null : ' da rodada' }}</h2>
-    <span>{{ game.winner }}</span>
+    <span class="left">🎉 </span
+    ><span class="fancytext_tiny"
+      >Vencedor{{ game.gameEnd ? null : ' da rodada' }}</span
+    ><span> 🎉</span>
+    <h2 class="fancytext_big">{{ game.winner }}</h2>
   </dialog>
 
   <header>
-    <h1>RODADA {{ game.round }}</h1>
-    <h2>{{ game.lobbyCode }}</h2>
+    <h1 class="fancytext_big">RODADA {{ game.round }}</h1>
+    <h2 class="fancytext_tiny">{{ game.lobbyCode }}</h2>
   </header>
 
   <main>
     <section>
-      <span>{{ thingsTuple[0] }}</span>
+      <span class="fancytext_mid">{{ thingsTuple[0] }}</span>
       <button @click="voteL" :disabled="disabledL">VOTAR</button>
       <ul>
-        <li v-for="v in votesTuple[0]" :key="v">{{ v }}</li>
+        <li class="fancytext_tiny" v-for="v in votesTuple[0]" :key="v">
+          {{ v }}
+        </li>
       </ul>
     </section>
-    <div className="vbar"></div>
     <section>
-      <span>{{ thingsTuple[1] }}</span>
+      <span class="fancytext_mid">{{ thingsTuple[1] }}</span>
       <button @click="voteR" :disabled="disabledR">VOTAR</button>
       <ul>
-        <li v-for="v in votesTuple[1]" :key="v">{{ v }}</li>
+        <li class="fancytext_tiny" v-for="v in votesTuple[1]" :key="v">
+          {{ v }}
+        </li>
       </ul>
     </section>
   </main>

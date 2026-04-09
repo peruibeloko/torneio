@@ -2,13 +2,26 @@ dialog {
   margin: auto;
   padding: 2rem;
   text-align: center;
-  border: 5px crimson solid;
+  border: var(--border);
   border-radius: 1rem;
+  background-color: var(--color__main_less);
 
   h2 {
     font-size: 3rem;
+  }
+
+  span {
+    font-size: 1.5rem;
     font-weight: bold;
-    margin: 1rem;
+  }
+
+  span.left {
+    transform: scaleX(-1);
+  }
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
   }
 }
 
@@ -18,11 +31,15 @@ header h2 {
 }
 
 main {
+  display: flex;
+  gap: 5rem;
+  
   section {
-    width: 15rem;
+    width: 25rem;
     display: flex;
     flex-direction: column;
     align-items: center;
+    line-break: anywhere;
   }
 
   span {
@@ -40,7 +57,7 @@ main {
       border-color: green;
       background-color: lightgreen;
       color: black;
-      
+
       &:hover {
         color: inherit;
         cursor: not-allowed;

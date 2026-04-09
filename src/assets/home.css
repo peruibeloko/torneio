@@ -2,19 +2,47 @@ header {
   margin-bottom: 1rem;
 }
 
-h2 {
-  margin-bottom: 1rem;
+h1 {
+  animation: 3s ease-in-out 0s hover;
+  animation-iteration-count: infinite;
 }
 
 main {
   flex-direction: column;
-
   gap: 3rem;
+}
 
-  section {
+section.join {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+span {
+  color: white;
+  text-shadow: 2px 2px 2px black;
+}
+
+section.howto {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  ol {
+    list-style: decimal;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+
+    li {
+      font-family: var(--sans);
+      color: white;
+      text-shadow: 2px 2px 2px black;
+    }
   }
 }
 
@@ -22,4 +50,18 @@ div.side {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+@keyframes hover {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(0.25rem);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
 }

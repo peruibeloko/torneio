@@ -1,3 +1,5 @@
+@import 'variables.css';
+
 *,
 *::before,
 *::after {
@@ -6,67 +8,13 @@
 * {
   margin: 0;
   padding: 0;
+  font-family: var(--sans);
 }
 
 html,
 body {
   height: 100dvh;
-}
-
-input {
-  height: 2rem;
-  padding: 1rem 0.5rem;
-  border: 3px solid crimson;
-  border-radius: 0.5rem;
-}
-
-button {
-  background: none;
-  border: none;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 0.5rem 0.5rem;
-  border-radius: 0.5rem;
-  border: 3px solid crimson;
-
-  &:hover {
-    background: crimson;
-    color: white;
-  }
-}
-
-:disabled {
-  cursor: not-allowed;
-  color: gray;
-  border-color: gray;
-  background-color: lightgray;
-
-  &:hover {
-    background-color: lightgray;
-    color: gray;
-  }
-}
-
-li {
-  font-family: monospace;
-  font-size: 1.2rem;
-}
-
-div.inputGroup {
-  display: flex;
-  input {
-    width: 10rem;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
-  }
-
-  button {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
+  background-color: var(--color__bg);
 }
 
 body {
@@ -82,21 +30,120 @@ header {
   margin-top: 5rem;
   margin-bottom: 1rem;
   text-align: center;
+
+  h1 {
+    font-size: 2rem;
+    font-family: var(--sans);
+    font-weight: 900;
+  }
 }
 
 main {
   display: flex;
 }
 
-div.vbar {
-  min-height: 90%;
-  margin: 0 2rem;
-  grid-area: vbar;
-  background: lightgray;
-  width: 5px;
+hr {
+  color: var(--color__main);
 }
 
 ul,
 ol {
   list-style: none;
+
+  li {
+    font-family: monospace;
+    font-size: 1.2rem;
+  }
+}
+
+input {
+  font-size: 1rem;
+  height: 2rem;
+  padding: 1rem 0.5rem;
+  background-color: var(--color__main_less);
+  border: var(--border);
+  border-radius: 0.5rem;
+  outline: none;
+
+  &:focus {
+    border-style: dashed;
+  }
+}
+
+button {
+  display: flex;
+  align-items: center;
+
+  height: 2rem;
+  padding: 1rem 0.5rem;
+
+  font-size: 1rem;
+  text-align: center;
+
+  background: none;
+
+  border: none;
+  border: var(--border);
+  border-radius: 0.5rem;
+  color: black;
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color__main_less);
+    color: var(--color__main);
+  }
+}
+
+div.inputGroup {
+  display: flex;
+  input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+  }
+
+  button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+}
+
+input:disabled,
+button:disabled {
+  cursor: not-allowed !important;
+  color: gray !important;
+  border-color: gray !important;
+  background-color: lightgray !important;
+
+  &:hover {
+    background-color: lightgray !important;
+    color: gray !important;
+  }
+}
+
+.fancytext_big {
+  color: white;
+  text-shadow: 3px 3px 0px black;
+  -webkit-text-stroke: 1px black;
+  font-weight: 900;
+}
+
+.fancytext_mid {
+  color: white;
+  text-shadow: 2px 2px 0px black;
+  -webkit-text-stroke: 1px black;
+  font-weight: 900;
+}
+
+.fancytext_small {
+  color: white;
+  text-shadow: 1.5px 1.5px 0px black;
+  -webkit-text-stroke: 0.7px black;
+  font-weight: 900;
+}
+
+.fancytext_tiny {
+  color: white;
+  text-shadow: 2px 2px 2px black;
 }

@@ -138,13 +138,12 @@ export class ServerLobby {
   voteFor(thing: string, player: string) {
     if (this.#state.stage !== 'game') return;
 
+    this.#state.totalVotes += this.#state.votes.vote(thing, player);
+
     this.#shoutMsg({
       type: 'newVote',
       data: { player, thing }
     });
-
-    this.#state.votes.vote(thing, player);
-    this.#state.totalVotes += 1;
 
     console.log('total votes', this.#state.totalVotes);
     console.log('total players', this.#players.size);

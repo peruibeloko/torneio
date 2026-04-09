@@ -47,7 +47,20 @@ export class Tournament {
     const votesL = votes[0].length;
     const votesR = votes[1].length;
 
+    console.log(
+      'round result: %s (%d) x %s (%d)',
+      thingL,
+      votesL,
+      thingR,
+      votesR
+    );
+
     if (votesL === votesR) {
+      if (this.#contestants.length === 0) {
+        this.#contestants = [thingR, thingL];
+        return null;
+      }
+
       const newContestant = thingL === this.#winner ? thingR : thingL;
       this.#contestants = [newContestant, ...this.#contestants];
       return null;

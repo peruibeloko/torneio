@@ -52,14 +52,27 @@ export class Votes {
   }
 
   vote(thing: string, player: string) {
-    if (thing === this.#thingL.value) {
+    const voteL = thing === this.#thingL.value;
+
+    if (voteL && this.#votesR.value.has(player)) {
       this.#votesR.value.delete(player);
       this.#votesL.value.add(player);
-      return;
+      return 0;
     }
 
-    this.#votesL.value.delete(player);
+    if (voteL) {
+      this.#votesL.value.add(player);
+      return 1;
+    }
+
+    if (this.#votesL.value.has(player)) {
+      this.#votesL.value.delete(player);
+      this.#votesR.value.add(player);
+      return 0;
+    }
+
     this.#votesR.value.add(player);
+    return 1;
   }
 
   reset() {

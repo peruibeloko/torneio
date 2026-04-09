@@ -13,7 +13,6 @@ export const useLobbyStore = defineStore('lobby', () => {
       type: 'suggest',
       data: { thing, lobbyCode: internal.lobbyCode }
     });
-    console.log('suggesting', thing);
   }
 
   function ready() {
@@ -24,7 +23,6 @@ export const useLobbyStore = defineStore('lobby', () => {
         player: internal.playerName
       }
     });
-    console.log(internal.playerName, 'is ready');
   }
 
   return {

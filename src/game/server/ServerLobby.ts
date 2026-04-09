@@ -1,7 +1,8 @@
-import type { OutMsg } from '@/game/server/ServerMessages.ts';
+import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
 import { voteState } from '@/game/shared/votes.ts';
+import { encode } from 'msgpack';
 
 export class ServerLobby {
   #lobbyCode: string;
@@ -18,15 +19,14 @@ export class ServerLobby {
     };
   }
 
-  #sendMsg(msg: OutMsg, socket: WebSocket) {
+  #sendMsg(msg: ServerMessage, socket: WebSocket) {
     console.log('sending message', msg);
-    socket.send(JSON.stringify(msg));
+    socket.send(encode(msg));
   }
 
-  #shoutMsg(msg: OutMsg) {
+  #shoutMsg(msg: ServerMessage) {
     console.log('shouting message', msg);
-    for (const { socket } of this.#players.values())
-      socket.send(JSON.stringify(msg));
+    for (const { socket } of this.#players.values()) socket.send(encode(msg));
   }
 
   get stage() {
@@ -110,20 +110,14 @@ export class ServerLobby {
   }
 
   removePlayer(player: string) {
-    // notify everyone of the leaving player
     this.#shoutMsg({ type: 'playerLeft', data: player });
-
-    // remove player from lobby
     this.#players.delete(player);
-
     return this.#players.size;
   }
 
   suggestThing(thing: string) {
     if (this.#state.stage !== 'lobby') return;
-
     this.#shoutMsg({ type: 'newSuggestion', data: thing });
-
     this.#state.things.push(thing);
   }
 

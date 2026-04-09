@@ -10,7 +10,6 @@ export const useHomeStore = defineStore('home', () => {
     const lobbyCode = await fetch('/api/createLobby', { method: 'POST' }).then(
       r => r.text()
     );
-    console.log('created lobby', lobbyCode);
     return lobbyCode;
   }
 
@@ -39,7 +38,6 @@ export const useHomeStore = defineStore('home', () => {
       }
     });
 
-    console.log(internal.playerName, 'joined lobby', internal.lobbyCode);
     return gameInfo.stage as GameStages;
   }
 

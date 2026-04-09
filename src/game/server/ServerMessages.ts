@@ -1,6 +1,6 @@
 import type { GameStages } from '@/game/shared/constants.ts';
 
-export type OutMsg =
+export type ServerMessage =
   | { type: 'allPlayers'; data: AllPlayersMsg }
   | { type: 'allVotes'; data: AllVotesMsg }
   | { type: 'allSuggestions'; data: AllSuggestionsMsg }
@@ -9,10 +9,10 @@ export type OutMsg =
   | { type: 'playerLeft'; data: string }
   | { type: 'newVote'; data: VoteMsg }
   | { type: 'newSuggestion'; data: string }
-  | { type: 'gameStart' }
-  | { type: 'gameInfo'; data: GameInfoMsg }
   | { type: 'roundStart'; data: RoundStartMsg }
-  | { type: 'roundEnd'; data: RoundEndMsg };
+  | { type: 'roundEnd'; data: RoundEndMsg }
+  | { type: 'gameInfo'; data: GameInfoMsg }
+  | { type: 'gameStart' };
 
 export type AllPlayersMsg = {
   name: string;
@@ -21,25 +21,25 @@ export type AllPlayersMsg = {
 
 export type AllSuggestionsMsg = string[];
 
-export interface AllVotesMsg {
+export type AllVotesMsg = {
   things: [thingL: string, thingR: string];
   votes: [votesL: string[], votesR: string[]];
-}
+};
 
-export interface GameInfoMsg {
+export type GameInfoMsg = {
   uniqueName: string;
   stage: GameStages;
-}
+};
 
-export interface RoundStartMsg {
+export type RoundStartMsg = {
   things: [string, string];
   round: number;
-}
+};
 
-export interface RoundEndMsg {
+export type RoundEndMsg = {
   winner: string;
   gameEnd: boolean;
-}
+};
 
 export type VoteMsg = {
   player: string;

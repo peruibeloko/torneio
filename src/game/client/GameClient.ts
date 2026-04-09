@@ -1,4 +1,8 @@
-import type { AllVotesMsg, OutMsg } from '@/game/server/ServerMessages.ts';
+import { decode } from 'msgpack';
+import type {
+  AllVotesMsg,
+  ServerMessage
+} from '@/game/server/ServerMessages.ts';
 import type { ClientPlayer } from '@/game/shared/constants.ts';
 import { voteState } from '@/game/shared/votes.ts';
 import { useGameInternalStore } from '@/stores/internal.ts';
@@ -10,9 +14,11 @@ export class GameClient {
   constructor() {}
 
   setup() {
-    this.#game.socket.addEventListener('message', e =>
-      this.#handleMsg(JSON.parse(e.data))
-    );
+    this.#game.socket.addEventListener('message', e => {
+      (e.data as Blob)
+        .bytes()
+        .then(b => this.#handleMsg(decode(b) as ServerMessage));
+    });
   }
 
   #updateInfo(uniqueName: string) {
@@ -30,24 +36,20 @@ export class GameClient {
     this.#votes.setThings(things);
 
     this.#game.roundStartCallback();
-    console.log('new round', this.#votes.thingsTuple);
   }
 
   #endRound(winner: string, gameEnd: boolean) {
     this.#game.winner = winner;
     this.#game.isGameEnd = gameEnd;
     this.#game.roundEndCallback();
-    console.log('round winner:', winner, 'game ended:', gameEnd);
   }
 
   #newSuggestion(thing: string) {
     this.#game.things.unshift(thing);
-    console.log('got suggestion', thing);
   }
 
   #newPlayer(name: string) {
     this.#game.players.push({ name, ready: false });
-    console.log(name, 'joined');
   }
 
   #playerReady(name: string) {
@@ -58,32 +60,26 @@ export class GameClient {
   #playerLeft(name: string) {
     const idx = this.#game.players.findIndex(p => p.name === name);
     this.#game.players.splice(idx, 1);
-    console.log(name, 'left');
   }
 
   #newVote(player: string, thing: string) {
     this.#votes.vote(thing, player);
-    console.log(player, 'voted for', thing);
   }
 
   #setSuggestions(things: string[]) {
     this.#game.things = things;
-    console.log('suggestions so far:', things);
   }
 
   #setPlayers(players: ClientPlayer[]) {
     this.#game.players = players;
-    console.log('current players:', players);
   }
 
   #setVotes({ things, votes }: AllVotesMsg) {
     this.#votes.setThings(things);
     this.#votes.setVotes(votes);
-
-    console.log('current votes:', { things, votes });
   }
 
-  #handleMsg(msg: OutMsg) {
+  #handleMsg(msg: ServerMessage) {
     switch (msg.type) {
       case 'allPlayers':
         this.#setPlayers(msg.data);

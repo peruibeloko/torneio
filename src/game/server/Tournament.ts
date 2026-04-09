@@ -47,7 +47,6 @@ export class Tournament {
     const votesL = votes[0].length;
     const votesR = votes[1].length;
 
-    // handle ties
     if (votesL === votesR) {
       const newContestant = thingL === this.#winner ? thingR : thingL;
       this.#contestants = [newContestant, ...this.#contestants];

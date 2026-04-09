@@ -1,6 +1,7 @@
+import { encode, decode } from 'msgpack';
 import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ClientMessage } from '@/game/client/ClientMessages.ts';
-import type { OutMsg } from '@/game/server/ServerMessages.ts';
+import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import type { ServerPlayer } from '@/game/shared/constants.ts';
 
 type Lobbies = Map<string, ServerLobby>;
@@ -28,7 +29,7 @@ export class GameServer {
       const getRandomChar = () => randomIntBetween(65, 90);
 
       const codes = new Array(6)
-        .fill(0) // or else map doesnt work
+        .fill(0) // map doesnt work on empty arrays
         .map(getRandomChar);
 
       return String.fromCodePoint(...codes);
@@ -82,18 +83,15 @@ export class GameServer {
 
   addConnection(socket: WebSocket) {
     socket.addEventListener('message', ({ data }) => {
-      this.handleMsg(JSON.parse(data), socket);
+      this.handleMsg(decode(data) as ClientMessage, socket);
     });
   }
 
-  sendMsg(msg: OutMsg, socket: WebSocket) {
-    console.log('sending message', msg);
-    socket.send(JSON.stringify(msg));
+  sendMsg(msg: ServerMessage, socket: WebSocket) {
+    socket.send(encode(msg));
   }
 
   handleMsg(msg: ClientMessage, socket: WebSocket) {
-    console.log('new message', msg);
-
     switch (msg.type) {
       case 'create':
         this.createLobby();

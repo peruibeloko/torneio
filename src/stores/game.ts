@@ -40,7 +40,6 @@ export const useGameStore = defineStore('game', () => {
         lobbyCode: internal.lobbyCode
       }
     });
-    console.log('voting for', thing);
   }
 
   return {

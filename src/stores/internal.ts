@@ -1,5 +1,6 @@
 import type { ClientMessage } from "@/game/client/ClientMessages.ts";
 import type { ClientPlayer } from '@/game/shared/constants.ts';
+import { encode } from "msgpack";
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -20,8 +21,7 @@ export const useGameInternalStore = defineStore('gameInternal', () => {
   const roundEndCallback = ref(() => {});
 
   function sendMsg(msg: ClientMessage) {
-    console.log('sending message', msg);
-    socket.value.send(JSON.stringify(msg));
+    socket.value.send(encode(msg));
   }
 
   return {

@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { serveStatic, upgradeWebSocket } from 'hono/deno';
-import { JoinMsg } from '@/game/client/ClientMessages.ts';
+import { ClientMessage, JoinMsg } from '@/game/client/ClientMessages.ts';
 import { GameServer } from '@/game/server/GameServer.ts';
+import { decode } from 'msgpack';
 
 const gameServer = new GameServer();
 
@@ -23,7 +24,8 @@ api.get(
   upgradeWebSocket(() => ({
     onMessage({ data }, socket) {
       if (!socket.raw) return;
-      gameServer.handleMsg(JSON.parse(data as string), socket.raw);
+      const arrData = new Uint8Array(data as ArrayBuffer);
+      gameServer.handleMsg(decode(arrData) as ClientMessage, socket.raw);
     }
   }))
 );

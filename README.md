@@ -1,26 +1,37 @@
-# Fresh project
+# BEM VINDO AO TORNEIO DAS COISAS
 
-Your new Fresh project is ready to go. You can follow the Fresh "Getting
-Started" guide here: https://fresh.deno.dev/docs/getting-started
+Se você algum dia teve que decidir qual a coisa mais foda, talvez você goste do Torneio.
 
-## Usage
+Se você algum dia teve um grupo de amigos que teve que chegar em algum consenso sobre qual a coisa mais foda, talvez você goste do Torneio.
 
-Make sure to install Deno:
-https://docs.deno.com/runtime/getting_started/installation
+Se você gosta de julgar as escolhas dos outros, talvez você goste do Torneio.
 
-Then start the project in development mode:
+De qualquer modo, só tem um jeito de descobrir:
 
-```
-deno task dev
-```
+1. Crie uma sala
+1. Convide amigos
+1. Sugira coisas
+1. Vote
 
-This will watch the project directory and restart as necessary.
+Esse é o Torneio das Coisas. Não me pergunte porquê.
 
-## Game
+## Detalhes técnicos
 
-- Client and server live in the same repo
-- since the API lives in the same place the client is served from, connection logic is already segmented per player
-- you either create a room, or give a room code to join a game
-- once joined, the code is stored for easily joining back
-- each player chooses their name
-- upon joining the session, each player can add an entry to the pool
+O torneio é uma aplicação fullstack que consiste num SPA feito em Vue e um backend escrito em TypeScript. O conjunto todo roda no Deno Deploy, e a comunicação é feita via chamadas HTTP e WebSockets.
+
+O deploy realiza a build do front, e o back serve a API, os WebSockets e o front buildado.
+
+### O jogo
+
+Sofrendo melhorias constantes. Dá uma olhada nas issues pra ver o que tá rolando.
+
+### Para rodar
+
+1. Instale o Deno
+1. Clone o repo
+1. `deno install`
+1. `deno task dev`
+
+## Contribuições
+
+São bem vindas, mas não se decepcione se eu demorar pra aceitar

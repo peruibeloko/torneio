@@ -11,12 +11,6 @@
         <li v-for="p in game.players" :key="p.name">
           {{ p.ready ? '🟩' : '🟥' }} {{ p.name }}
         </li>
-        <li v-for="p in game.players" :key="p.name">
-          {{ p.ready ? '🟩' : '🟥' }} {{ p.name }}
-        </li>
-        <li v-for="p in game.players" :key="p.name">
-          {{ p.ready ? '🟩' : '🟥' }} {{ p.name }}
-        </li>
       </ul>
       <button
         @click="handleReady"

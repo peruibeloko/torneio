@@ -9,13 +9,17 @@ const gameServer = new GameServer();
 const api = new Hono();
 
 api.post('/createLobby', c => {
+  console.log('createLobby request');
   const lobbyCode = gameServer.createLobby();
+  console.log('lobbyCode response', lobbyCode);
   return c.text(lobbyCode);
 });
 
 api.post('/joinLobby', async c => {
   const body = await c.req.json<JoinMsg>();
+  console.log('joinLobby request', body);
   const gameInfo = gameServer.joinLobby(body.lobbyCode, body.player);
+  console.log('gameInfo response', gameInfo);
   return c.json(gameInfo);
 });
 

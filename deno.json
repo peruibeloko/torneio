@@ -18,14 +18,14 @@
   "imports": {
     "@/": "./src/",
     "@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.2",
+    "@std/path": "jsr:@std/path@^1.1.4",
     "msgpack": "jsr:@std/msgpack@^1.0.3",
-    "path": "jsr:@std/path@^1.1.4",
     "@tsconfig/node24": "npm:@tsconfig/node24@^24.0.4",
     "@vue/tsconfig": "npm:@vue/tsconfig@^0.9.1",
     "hono": "jsr:@hono/hono@^4.12.9",
     "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6.0.5",
     "pinia": "npm:pinia@^3.0.4",
-    "vite": "npm:vite@^8.0.3",
+    "vite": "npm:vite@6.4.2",
     "vue": "npm:vue@^3.5.31",
     "vue-router": "npm:vue-router@^5.0.4",
     "vue-tsc": "npm:vue-tsc@^3.2.6"

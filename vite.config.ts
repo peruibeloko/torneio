@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import { fromFileUrl } from "path";
-import deno from "@deno/vite-plugin";
+import deno from '@deno/vite-plugin';
+import { fromFileUrl } from '@std/path';
 
 export default defineConfig({
   plugins: [deno(), vue()],

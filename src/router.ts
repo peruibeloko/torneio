@@ -6,12 +6,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/pages/Home.vue')
+      component: () => import('./pages/Home.vue')
     },
     {
       path: '/lobby',
       name: 'lobby',
-      component: () => import('@/pages/Lobby.vue'),
+      component: () => import('./pages/Lobby.vue'),
       beforeEnter(to, from) {
         if (from.name !== 'home') return { name: 'home' };
       }
@@ -19,7 +19,7 @@ const router = createRouter({
     {
       path: '/game',
       name: 'game',
-      component: () => import('@/pages/Game.vue'),
+      component: () => import('./pages/Game.vue'),
       beforeEnter(to, from) {
         if (from.name !== 'lobby' && from.name !== 'home')
           return { name: 'home' };

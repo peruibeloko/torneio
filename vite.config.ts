@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [deno(), vue()],
   resolve: {
     alias: {
-      '@': fromFileUrl(new URL('./src', import.meta.url))
+      '@': fromFileUrl(import.meta.resolve('./src'))
     }
   },
   server: {

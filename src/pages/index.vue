@@ -61,7 +61,7 @@
 import { useHomeStore } from '@/stores/home.ts';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { onEnter } from '../composables/enter.ts';
+import { onEnter } from '@/composables/enter.ts';
 
 const router = useRouter();
 const game = useHomeStore();

@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import { fromFileUrl } from "@std/path";
+import { fromFileUrl } from "path";
 import deno from "@deno/vite-plugin";
 
 export default defineConfig({
@@ -8,6 +8,13 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fromFileUrl(new URL('./src', import.meta.url))
+    }
+  },
+  build: {
+    rolldownOptions: {
+      external: [
+        'msgpack'
+      ]
     }
   },
   server: {

@@ -10,13 +10,6 @@ export default defineConfig({
       '@': fromFileUrl(new URL('./src', import.meta.url))
     }
   },
-  build: {
-    rolldownOptions: {
-      external: [
-        'msgpack'
-      ]
-    }
-  },
   server: {
     port: 3000,
     proxy: {

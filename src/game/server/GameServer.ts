@@ -15,6 +15,10 @@ export class GameServer {
     return this.#lobbies.get(lobbyCode)!;
   }
 
+  lobbyExists(lobbyCode: string) {
+    return this.#lobbies.get(lobbyCode) !== undefined;
+  }
+
   createLobby() {
     const randomIntBetween = (min: number, max: number) => {
       const minCeiled = Math.ceil(min);

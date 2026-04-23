@@ -13,12 +13,15 @@
     <section class="join">
       <div class="side">
         <h2 class="fancytext_small">Entrar em uma sala</h2>
+        <h3 class="fancytext_small errorText" v-show="joinError">Sala não encontrada!</h3>
         <div class="inputGroup">
           <input
             :disabled="disableButtons"
             type="text"
             placeholder="ABCXYZ"
             v-model.trim="lobbyCode"
+            maxlength="6"
+            minlength="6"
             @keydown="onEnter(joinLobby)"
             required
           />
@@ -69,17 +72,28 @@ const disableButtons = ref(false);
 
 const playerName = ref('');
 const lobbyCode = ref('');
+const joinError = ref(false);
 
-const isCodeValid = computed(() => /[A-Z]{6}/.test(lobbyCode.value));
+const isCodeValid = computed(() => /[a-z]{6}/i.test(lobbyCode.value));
 const isNameValid = computed(() => playerName.value.length > 0);
 
 const joinLobby = async () => {
+  joinError.value = false;
   if (!isCodeValid) return false;
   if (!isNameValid) return false;
 
   disableButtons.value = true;
   const stage = await game.joinLobby(playerName.value, lobbyCode.value);
+
+  if (stage === null) {
+    disableButtons.value = false;
+    joinError.value = true;
+    setTimeout(() => joinError.value = false, 3000)
+    return;
+  }
+
   if (stage === 'lobby') return router.push({ name: 'lobby' });
+
   router.push({ name: 'game' });
 };
 

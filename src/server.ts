@@ -18,9 +18,13 @@ api.post('/createLobby', c => {
 api.post('/joinLobby', async c => {
   const body = await c.req.json<JoinMsg>();
   console.log('joinLobby request', body);
-  const gameInfo = gameServer.joinLobby(body.lobbyCode, body.player);
-  console.log('gameInfo response', gameInfo);
-  return c.json(gameInfo);
+  
+  const lobbyExists = gameServer.lobbyExists(body.lobbyCode.toUpperCase());
+  if (!lobbyExists) return c.notFound();
+  
+  const lobbyInfo = gameServer.joinLobby(body.lobbyCode.toUpperCase(), body.player);
+  console.log('lobbyInfo response', lobbyInfo);
+  return c.json(lobbyInfo);
 });
 
 api.get(

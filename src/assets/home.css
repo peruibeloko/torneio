@@ -52,6 +52,10 @@ div.side {
   align-items: center;
 }
 
+h3.errorText {
+  color: red;
+}
+
 @keyframes hover {
   0% {
     transform: translateY(0);

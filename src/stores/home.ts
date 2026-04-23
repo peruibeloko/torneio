@@ -16,8 +16,7 @@ export const useHomeStore = defineStore('home', () => {
   async function joinLobby(name: string, lobbyCode: string) {
     internal.lobbyCode = lobbyCode;
 
-    // TODO check if lobby exists
-    const gameInfo: GameInfo = await fetch('/api/joinLobby', {
+    const res = await fetch('/api/joinLobby', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -26,7 +25,11 @@ export const useHomeStore = defineStore('home', () => {
         player: name,
         lobbyCode: internal.lobbyCode
       } as JoinMsg)
-    }).then(r => r.json());
+    });
+
+    if (res.status === 404) return null;
+
+    const gameInfo: GameInfo = await res.json();
 
     internal.playerName = gameInfo.uniqueName;
 

@@ -1,4 +1,4 @@
-import { ThingTuple, VotesTuple } from '@/game/shared/votes.ts';
+import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
 
 export class Tournament {
   #round: number;
@@ -48,7 +48,7 @@ export class Tournament {
     const votesR = votes[1].length;
 
     console.log(
-      'round result: %s (%d) x %s (%d)',
+      'round result: %s (%d) x (%d) %s',
       thingL,
       votesL,
       thingR,

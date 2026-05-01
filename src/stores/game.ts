@@ -1,11 +1,11 @@
-import { voteState } from '@/game/shared/votes.ts';
 import { useGameInternalStore } from '@/stores/internal.ts';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
+import { useVoteStore } from "@/stores/votes.ts";
 
 export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();
-  const votes = voteState();
+  const votes = useVoteStore();
 
   const playerName = computed(() => internal.playerName);
 

@@ -1,15 +1,15 @@
-import { decode } from 'msgpack';
 import type {
   AllVotesMsg,
   ServerMessage
 } from '@/game/server/ServerMessages.ts';
 import type { ClientPlayer } from '@/game/shared/constants.ts';
-import { voteState } from '@/game/shared/votes.ts';
 import { useGameInternalStore } from '@/stores/internal.ts';
+import { useVoteStore } from '@/stores/votes.ts';
+import { decode } from 'msgpack';
 
 export class GameClient {
   #game = useGameInternalStore();
-  #votes = voteState();
+  #votes = useVoteStore();
 
   constructor() {}
 
@@ -60,6 +60,7 @@ export class GameClient {
   #playerLeft(name: string) {
     const idx = this.#game.players.findIndex(p => p.name === name);
     this.#game.players.splice(idx, 1);
+    this.#votes.removePlayer(name);
   }
 
   #newVote(player: string, thing: string) {

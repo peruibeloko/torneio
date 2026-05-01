@@ -1,7 +1,7 @@
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
-import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
-import { voteState } from '@/game/shared/votes.ts';
+import { voteState } from '@/game/server/Votes.ts';
+import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
 
 export class ServerLobby {
@@ -88,8 +88,8 @@ export class ServerLobby {
             {
               type: 'allVotes',
               data: {
-                things: this.#state.votes.thingsTuple.value,
-                votes: this.#state.votes.votesTuple.value
+                things: this.#state.votes.thingsTuple(),
+                votes: this.#state.votes.votesTuple()
               }
             },
             player.socket
@@ -111,7 +111,16 @@ export class ServerLobby {
 
   removePlayer(player: string) {
     this.#shoutMsg({ type: 'playerLeft', data: player });
+    
     this.#players.delete(player);
+    
+    if (this.#state.stage === 'game') {
+      this.#state.votes.removePlayer(player);
+      this.#state.totalVotes -= 1;
+
+      if (this.#state.totalVotes === this.#players.size) this.endRound();
+    }
+   
     return this.#players.size;
   }
 
@@ -191,8 +200,8 @@ export class ServerLobby {
     if (this.#state.stage !== 'game') return;
 
     const winner = this.#tournament.handleMatchEnd([
-      this.#state.votes.thingsTuple.value,
-      this.#state.votes.votesTuple.value
+      this.#state.votes.thingsTuple(),
+      this.#state.votes.votesTuple()
     ]);
 
     const round = this.#state.round;

@@ -1,4 +1,4 @@
-import type { Votes } from '@/game/shared/votes.ts';
+import type { Votes } from '@/game/server/Votes.ts';
 
 export type ServerPlayer = {
   ready: boolean;

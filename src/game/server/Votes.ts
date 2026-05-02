@@ -4,8 +4,6 @@ export type VotesTuple = [votesL: number, votesR: number];
 export type VotesChangeCb = (votes: VotesTuple) => void;
 export type ThingsChangeCb = (things: ThingTuple) => void;
 
-export const voteState = () => Votes.instance;
-
 export class Votes {
   #thingL = '';
   #thingR = '';
@@ -17,7 +15,7 @@ export class Votes {
 
   static #instance: Votes;
 
-  static get instance() {
+  static getInstance() {
     if (!Votes.#instance) Votes.#instance = new Votes();
     return Votes.#instance;
   }
@@ -30,14 +28,21 @@ export class Votes {
     return [this.#votesL.size, this.#votesR.size] as VotesTuple;
   }
 
-  setThings([left, right]: [string, string]) {
+  startRound([left, right]: [string, string]) {
     this.#thingL = left;
     this.#thingR = right;
+
+    this.#votesL.clear();
+    this.#votesR.clear();
+    this.#total.clear();
   }
 
   removePlayer(player: string) {
+    this.#total.delete(player);
     this.#votesL.delete(player);
     this.#votesR.delete(player);
+
+    return this.#total.size;
   }
 
   vote(thing: string, player: string) {

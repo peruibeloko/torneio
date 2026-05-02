@@ -1,6 +1,6 @@
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
-import { voteState } from '@/game/server/Votes.ts';
+import { Votes } from '@/game/server/Votes.ts';
 import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
 
@@ -115,8 +115,10 @@ export class ServerLobby {
     this.#players.delete(player);
 
     if (this.#state.stage === 'game') {
-      this.#state.votes.removePlayer(player);
-      this.#state.totalVotes -= 1;
+      this.#state.totalVotes = this.#state.votes.removePlayer(player);
+
+      console.log('total votes', this.#state.totalVotes);
+      console.log('total players', this.#players.size);
 
       if (this.#state.totalVotes === this.#players.size) this.endRound();
     }
@@ -180,15 +182,14 @@ export class ServerLobby {
       things
     );
 
-    const votes = voteState();
-    votes.setThings(things);
-
     this.#state = {
       stage: 'game',
       totalVotes: 0,
       round: this.#tournament.currentRound,
-      votes: votes
+      votes: Votes.getInstance()
     };
+
+    this.#state.votes.startRound(things);
 
     this.#shoutMsg({
       type: 'roundStart',

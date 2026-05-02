@@ -60,6 +60,11 @@ export class Tournament {
         this.#contestants = [thingR, thingL];
         return null;
       }
+      
+      if (this.#winner === '') {
+        this.#contestants = [thingR, thingL];
+        return null;
+      }
 
       const newContestant = thingL === this.#winner ? thingR : thingL;
       this.#contestants = [newContestant, ...this.#contestants];

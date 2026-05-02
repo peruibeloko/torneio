@@ -3,6 +3,7 @@ import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ClientMessage } from '@/game/client/ClientMessages.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import type { ServerPlayer } from '@/game/shared/constants.ts';
+import { GameEvent } from "@/game/server/EventBus.ts";
 
 type Lobbies = Map<string, ServerLobby>;
 
@@ -83,12 +84,6 @@ export class GameServer {
 
   voteFor(lobbyCode: string, thing: string, player: string) {
     this.getLobby(lobbyCode).voteFor(thing, player);
-  }
-
-  addConnection(socket: WebSocket) {
-    socket.addEventListener('message', ({ data }) => {
-      this.handleMsg(decode(data) as ClientMessage, socket);
-    });
   }
 
   sendMsg(msg: ServerMessage, socket: WebSocket) {

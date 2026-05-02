@@ -51,8 +51,8 @@ export class Tournament {
       'round result: %s (%d) x (%d) %s',
       thingL,
       votesL,
-      thingR,
-      votesR
+      votesR,
+      thingR
     );
 
     if (votesL === votesR) {

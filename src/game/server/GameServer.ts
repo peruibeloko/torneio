@@ -1,9 +1,8 @@
-import { encode, decode } from 'msgpack';
-import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ClientMessage } from '@/game/client/ClientMessages.ts';
+import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import type { ServerPlayer } from '@/game/shared/constants.ts';
-import { GameEvent } from "@/game/server/EventBus.ts";
+import { encode } from 'msgpack';
 
 type Lobbies = Map<string, ServerLobby>;
 

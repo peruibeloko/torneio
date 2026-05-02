@@ -111,16 +111,16 @@ export class ServerLobby {
 
   removePlayer(player: string) {
     this.#shoutMsg({ type: 'playerLeft', data: player });
-    
+
     this.#players.delete(player);
-    
+
     if (this.#state.stage === 'game') {
       this.#state.votes.removePlayer(player);
       this.#state.totalVotes -= 1;
 
       if (this.#state.totalVotes === this.#players.size) this.endRound();
     }
-   
+
     return this.#players.size;
   }
 
@@ -147,7 +147,7 @@ export class ServerLobby {
   voteFor(thing: string, player: string) {
     if (this.#state.stage !== 'game') return;
 
-    this.#state.totalVotes += this.#state.votes.vote(thing, player);
+    this.#state.totalVotes = this.#state.votes.vote(thing, player);
 
     this.#shoutMsg({
       type: 'newVote',

@@ -1,5 +1,5 @@
 export type ThingTuple = [thingL: string, thingR: string];
-export type VotesTuple = [votesL: string[], votesR: string[]];
+export type VotesTuple = [votesL: number, votesR: number];
 
 export type VotesChangeCb = (votes: VotesTuple) => void;
 export type ThingsChangeCb = (things: ThingTuple) => void;
@@ -11,6 +11,7 @@ export class Votes {
   #thingR = '';
   #votesL = new Set<string>();
   #votesR = new Set<string>();
+  #total = new Set<string>();
 
   private constructor() {}
 
@@ -26,27 +27,12 @@ export class Votes {
   }
 
   votesTuple() {
-    return [
-      this.#votesL.values().toArray(),
-      this.#votesR.values().toArray()
-    ] as VotesTuple;
-  }
-
-  votesDict() {
-    return {
-      [this.#thingL]: this.#votesL.values().toArray(),
-      [this.#thingR]: this.#votesR.values().toArray()
-    };
+    return [this.#votesL.size, this.#votesR.size] as VotesTuple;
   }
 
   setThings([left, right]: [string, string]) {
     this.#thingL = left;
     this.#thingR = right;
-  }
-
-  setVotes([left, right]: [string[], string[]]) {
-    this.#votesL = new Set(left);
-    this.#votesR = new Set(right);    
   }
 
   removePlayer(player: string) {
@@ -55,33 +41,18 @@ export class Votes {
   }
 
   vote(thing: string, player: string) {
-    const voteL = thing === this.#thingL;
+    const isVoteForL = thing === this.#thingL;
 
-    if (voteL && this.#votesR.has(player)) {
+    this.#total.add(player);
+
+    if (isVoteForL) {
       this.#votesR.delete(player);
       this.#votesL.add(player);
-      return 0;
-    }
-
-    if (voteL) {
-      this.#votesL.add(player);
-      return 1;
-    }
-
-    if (this.#votesL.has(player)) {
+    } else {
       this.#votesL.delete(player);
       this.#votesR.add(player);
-      return 0;
     }
 
-    this.#votesR.add(player);
-    return 1;
-  }
-
-  reset() {
-    this.#thingL = '';
-    this.#thingR = '';
-    this.#votesL.clear();
-    this.#votesR.clear();
+    return this.#total.size;
   }
 }

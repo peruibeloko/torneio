@@ -43,9 +43,7 @@ export class Tournament {
 
   handleMatchEnd([things, votes]: [ThingTuple, VotesTuple]) {
     const [thingL, thingR] = things;
-
-    const votesL = votes[0].length;
-    const votesR = votes[1].length;
+    const [votesL, votesR] = votes;
 
     console.log(
       'round result: %s (%d) x (%d) %s',
@@ -56,12 +54,7 @@ export class Tournament {
     );
 
     if (votesL === votesR) {
-      if (this.#contestants.length === 0) {
-        this.#contestants = [thingR, thingL];
-        return null;
-      }
-      
-      if (this.#winner === '') {
+      if (this.#contestants.length === 0 || this.#winner === '') {
         this.#contestants = [thingR, thingL];
         return null;
       }

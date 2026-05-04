@@ -28,8 +28,8 @@ export class Tournament {
     return out;
   }
 
-  setup(things: string[]) {
-    this.#contestants = this.#shuffleArray(things);
+  setup(things: Set<string>) {
+    this.#contestants = this.#shuffleArray(things.values().toArray());
   }
 
   getNextMatch() {

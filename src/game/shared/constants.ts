@@ -13,7 +13,7 @@ export interface ClientPlayer {
 export type VotesDict = { [thing: string]: Set<string> };
 
 export type GameState =
-  | { stage: 'lobby'; things: string[]; remainingReady: number }
+  | { stage: 'lobby'; things: Set<string>; remainingReady: number }
   | { stage: 'roundEnd'; round: number; winner: string; gameEnd: boolean }
   | {
       stage: 'game';

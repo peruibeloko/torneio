@@ -14,7 +14,7 @@ export class ServerLobby {
     this.#lobbyCode = lobbyCode;
     this.#state = {
       stage: 'lobby',
-      things: [],
+      things: new Set<string>(),
       remainingReady: 0
     };
   }
@@ -74,7 +74,7 @@ export class ServerLobby {
           );
 
           this.#sendMsg(
-            { type: 'allSuggestions', data: this.#state.things },
+            { type: 'allSuggestions', data: this.#state.things.values().toArray() },
             player.socket
           );
 
@@ -129,7 +129,7 @@ export class ServerLobby {
   suggestThing(thing: string) {
     if (this.#state.stage !== 'lobby') return;
     this.#shoutMsg({ type: 'newSuggestion', data: thing });
-    this.#state.things.push(thing);
+    this.#state.things.add(thing);
   }
 
   playerReady(player: string) {
@@ -165,7 +165,7 @@ export class ServerLobby {
   startGame() {
     if (this.#state.stage !== 'lobby') return;
     console.log('starting game');
-    this.#tournament.setup(this.#state.things as string[]);
+    this.#tournament.setup(this.#state.things);
     this.#shoutMsg({ type: 'gameStart' });
     this.startRound();
   }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useGameInternalStore } from '@/stores/internal.ts';
+import { useGameInternalStore } from '@/client/stores/internal.ts';
 import type { JoinMsg } from '@/game/client/ClientMessages.ts';
 import type { GameInfo, GameStages } from '@/game/shared/constants.ts';
 

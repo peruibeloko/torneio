@@ -1,15 +1,16 @@
 import type { ClientMessage } from '@/game/client/ClientMessages.ts';
+import { EventBus } from '@/game/events/EventBus.ts';
 import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
-import type { ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
 
-type Lobbies = Map<string, ServerLobby>;
-
 export class GameServer {
-  #lobbies: Lobbies = new Map();
+  #lobbies = new Map<string, ServerLobby>();
 
-  constructor() {}
+  constructor() {
+    EventBus.getInstance().subscribe('create', this.createLobby);
+    EventBus.getInstance().subscribe('join', this.addPlayer);
+  }
 
   getLobby(lobbyCode: string) {
     return this.#lobbies.get(lobbyCode)!;
@@ -20,29 +21,9 @@ export class GameServer {
   }
 
   createLobby() {
-    const randomIntBetween = (min: number, max: number) => {
-      const minCeiled = Math.ceil(min);
-      const maxFloored = Math.floor(max);
-      return Math.floor(
-        Math.random() * (maxFloored - minCeiled + 1) + minCeiled
-      );
-    };
-
-    const createRoomCode = () => {
-      // A - Z in ASCII
-      const getRandomChar = () => randomIntBetween(65, 90);
-
-      const codes = new Array(6)
-        .fill(0) // map doesnt work on empty arrays
-        .map(getRandomChar);
-
-      return String.fromCodePoint(...codes);
-    };
-
-    let lobbyCode = createRoomCode();
-
+    let lobbyCode = ServerLobby.generateRoomCode();
     while (this.#lobbies.has(lobbyCode)) {
-      lobbyCode = createRoomCode();
+      lobbyCode = ServerLobby.generateRoomCode();
     }
 
     this.#lobbies.set(lobbyCode, new ServerLobby(lobbyCode));
@@ -59,30 +40,10 @@ export class GameServer {
     };
   }
 
-  addPlayer(lobbyCode: string, name: string, player: ServerPlayer) {
-    player.socket.addEventListener('close', () => {
-      this.removePlayer(lobbyCode, name);
+  addPlayer({ socket, lobbyCode }: { socket: WebSocket; lobbyCode: string }) {
+    socket.addEventListener('close', () => {
+      if (this.getLobby(lobbyCode).size === 0) this.#lobbies.delete(lobbyCode);
     });
-
-    this.getLobby(lobbyCode).addPlayer(name, player);
-  }
-
-  removePlayer(lobbyCode: string, player: string) {
-    const remainingPlayers = this.getLobby(lobbyCode).removePlayer(player);
-    if (remainingPlayers !== 0) return;
-    this.#lobbies.delete(lobbyCode);
-  }
-
-  suggestThing(lobbyCode: string, thing: string) {
-    this.getLobby(lobbyCode).suggestThing(thing);
-  }
-
-  playerReady(lobbyCode: string, player: string) {
-    this.getLobby(lobbyCode).playerReady(player);
-  }
-
-  voteFor(lobbyCode: string, thing: string, player: string) {
-    this.getLobby(lobbyCode).voteFor(thing, player);
   }
 
   sendMsg(msg: ServerMessage, socket: WebSocket) {
@@ -90,38 +51,6 @@ export class GameServer {
   }
 
   handleMsg(msg: ClientMessage, socket: WebSocket) {
-    switch (msg.type) {
-      case 'create':
-        this.createLobby();
-        break;
-
-      case 'join':
-        this.addPlayer(msg.data.lobbyCode, msg.data.player, {
-          socket,
-          ready: false
-        });
-        break;
-
-      case 'ready':
-        this.playerReady(msg.data.lobbyCode, msg.data.player);
-        break;
-
-      case 'suggest':
-        this.suggestThing(msg.data.lobbyCode, msg.data.thing);
-        break;
-
-      case 'vote':
-        this.voteFor(msg.data.lobbyCode, msg.data.thing, msg.data.player);
-        break;
-
-      case 'leave':
-        this.removePlayer(msg.data.lobbyCode, msg.data.player);
-        break;
-
-      default:
-        console.error('Unsupported message:', msg);
-        msg;
-        break;
-    }
+    EventBus.getInstance().publish(msg.type, { socket, ...msg.data });
   }
 }

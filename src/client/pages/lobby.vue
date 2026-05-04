@@ -47,11 +47,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useLobbyStore } from '@/stores/lobby.ts';
+import { useLobbyStore } from '@/client/stores/lobby.ts';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { onEnter } from '@/composables/enter.ts';
-import { useGameStore } from '@/stores/game.ts';
+import { onEnter } from '@/client/composables/enter.ts';
+import { useGameStore } from '@/client/stores/game.ts';
 
 const game = useGameStore();
 const lobby = useLobbyStore();

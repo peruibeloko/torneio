@@ -4,7 +4,7 @@ import type {
 } from '@/game/server/ServerMessages.ts';
 import type { ClientPlayer } from '@/game/shared/constants.ts';
 import { useGameInternalStore } from '@/stores/internal.ts';
-import { useVoteStore } from '@/stores/votes.ts';
+import { useVoteStore } from '@/client/stores/votes.ts';
 import { decode } from 'msgpack';
 
 export class GameClient {

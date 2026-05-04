@@ -1,4 +1,4 @@
-import { useGameInternalStore } from '@/stores/internal.ts';
+import { useGameInternalStore } from '@/client/stores/internal.ts';
 import { defineStore } from 'pinia';
 
 export const useLobbyStore = defineStore('lobby', () => {

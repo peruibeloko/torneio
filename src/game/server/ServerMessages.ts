@@ -1,5 +1,5 @@
-import type { GameStages } from '@/game/shared/constants.ts';
 import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
+import type { GameStages } from '@/game/shared/constants.ts';
 
 export type ServerMessage =
   | { type: 'allPlayers'; data: AllPlayersMsg }

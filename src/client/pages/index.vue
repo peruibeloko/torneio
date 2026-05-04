@@ -61,10 +61,10 @@
 </template>
 
 <script lang="ts" setup>
-import { useHomeStore } from '@/stores/home.ts';
+import { useHomeStore } from '@/client/stores/home.ts';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { onEnter } from '@/composables/enter.ts';
+import { onEnter } from '@/client/composables/enter.ts';
 
 const router = useRouter();
 const game = useHomeStore();

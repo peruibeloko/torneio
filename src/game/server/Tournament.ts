@@ -1,4 +1,4 @@
-import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
+import { ThingTuple, VoteCount } from '@/game/server/Votes.ts';
 
 export class Tournament {
   #round: number;
@@ -41,7 +41,7 @@ export class Tournament {
     return [l, r] as [string, string];
   }
 
-  handleMatchEnd([things, votes]: [ThingTuple, VotesTuple]) {
+  handleMatchEnd([things, votes]: [ThingTuple, VoteCount]) {
     const [thingL, thingR] = things;
     const [votesL, votesR] = votes;
 

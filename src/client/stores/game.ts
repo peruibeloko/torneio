@@ -1,7 +1,7 @@
 import { useGameInternalStore } from '@/stores/internal.ts';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-import { useVoteStore } from "@/stores/votes.ts";
+import { useVoteStore } from "@/client/stores/votes.ts";
 
 export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();

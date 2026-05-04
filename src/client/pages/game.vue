@@ -35,8 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-import { useGameStore } from '@/stores/game';
-import { useVoteStore } from '@/stores/votes';
+import { useGameStore } from '@/client/stores/game';
+import { useVoteStore } from '@/client/stores/votes';
 import { ref, useTemplateRef } from 'vue';
 
 const game = useGameStore();

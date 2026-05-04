@@ -1,7 +1,8 @@
 export type ThingTuple = [thingL: string, thingR: string];
-export type VotesTuple = [votesL: number, votesR: number];
+export type VotesTuple = [playersL: string[], playersR: string[]];
+export type VoteCount = [votesL: number, votesR: number];
 
-export type VotesChangeCb = (votes: VotesTuple) => void;
+export type VotesChangeCb = (votes: VoteCount) => void;
 export type ThingsChangeCb = (things: ThingTuple) => void;
 
 export class Votes {
@@ -24,8 +25,15 @@ export class Votes {
     return [this.#thingL, this.#thingR] as ThingTuple;
   }
 
+  voteCount() {
+    return [this.#votesL.size, this.#votesR.size] as VoteCount;
+  }
+
   votesTuple() {
-    return [this.#votesL.size, this.#votesR.size] as VotesTuple;
+    return [
+      this.#votesL.values().toArray(),
+      this.#votesR.values().toArray()
+    ] as VotesTuple;
   }
 
   startRound([left, right]: [string, string]) {

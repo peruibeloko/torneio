@@ -3,9 +3,11 @@ import { Tournament } from '@/game/server/Tournament.ts';
 import { Votes } from '@/game/server/Votes.ts';
 import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
+import { ClientMessage } from '@/game/client/ClientMessages.ts';
+import { EventBus } from '@/game/events/EventBus.ts';
 
 export class ServerLobby {
-  #lobbyCode: string;
+  #lobbyCode: string; // telemetria
   #players = new Map<string, ServerPlayer>();
   #state: GameState;
   #tournament = new Tournament();
@@ -17,6 +19,22 @@ export class ServerLobby {
       things: new Set<string>(),
       remainingReady: 0
     };
+
+    const bus = EventBus.getInstance();
+
+    bus.subscribe('join', this.addPlayer);
+    bus.subscribe('leave', this.removePlayer);
+    bus.subscribe('ready', this.playerReady);
+    bus.subscribe('suggest', this.suggestThing);
+    bus.subscribe('vote', this.voteFor);
+  }
+
+  get stage() {
+    return this.#state.stage;
+  }
+
+  get size() {
+    return this.#players.size;
   }
 
   #sendMsg(msg: ServerMessage, socket: WebSocket) {
@@ -29,8 +47,23 @@ export class ServerLobby {
     for (const { socket } of this.#players.values()) socket.send(encode(msg));
   }
 
-  get stage() {
-    return this.#state.stage;
+  static generateRoomCode() {
+    const randomIntBetween = (min: number, max: number) => {
+      const minCeiled = Math.ceil(min);
+      const maxFloored = Math.floor(max);
+      return Math.floor(
+        Math.random() * (maxFloored - minCeiled + 1) + minCeiled
+      );
+    };
+
+    // A - Z in ASCII
+    const getRandomChar = () => randomIntBetween(65, 90);
+
+    const codes = new Array(6)
+      .fill(0) // map doesnt work on empty arrays
+      .map(getRandomChar);
+
+    return String.fromCodePoint(...codes);
   }
 
   getUniqueName(name: string) {
@@ -48,14 +81,18 @@ export class ServerLobby {
     return uniqueName;
   }
 
-  addPlayer(name: string, player: ServerPlayer) {
+  addPlayer({ player, socket }: { player: string; socket: WebSocket }) {
     this.#shoutMsg({
       type: 'playerJoined',
-      data: name
+      data: player
     });
 
-    this.#players.set(name, player);
+    this.#players.set(player, { ready: false, socket });
 
+    this.#syncPlayer(socket);
+  }
+
+  #syncPlayer(socket: WebSocket) {
     switch (this.#state.stage) {
       case 'lobby':
         {
@@ -70,12 +107,15 @@ export class ServerLobby {
                 }))
                 .toArray()
             },
-            player.socket
+            socket
           );
 
           this.#sendMsg(
-            { type: 'allSuggestions', data: this.#state.things.values().toArray() },
-            player.socket
+            {
+              type: 'allSuggestions',
+              data: this.#state.things.values().toArray()
+            },
+            socket
           );
 
           this.#state.remainingReady++;
@@ -92,7 +132,7 @@ export class ServerLobby {
                 votes: this.#state.votes.votesTuple()
               }
             },
-            player.socket
+            socket
           );
         }
         break;
@@ -103,13 +143,13 @@ export class ServerLobby {
             type: 'roundEnd',
             data: { gameEnd: this.#state.gameEnd, winner: this.#state.winner }
           },
-          player.socket
+          socket
         );
       }
     }
   }
 
-  removePlayer(player: string) {
+  removePlayer({ player }: { player: string }) {
     this.#shoutMsg({ type: 'playerLeft', data: player });
 
     this.#players.delete(player);
@@ -126,13 +166,13 @@ export class ServerLobby {
     return this.#players.size;
   }
 
-  suggestThing(thing: string) {
+  suggestThing({ thing }: { thing: string }) {
     if (this.#state.stage !== 'lobby') return;
     this.#shoutMsg({ type: 'newSuggestion', data: thing });
     this.#state.things.add(thing);
   }
 
-  playerReady(player: string) {
+  playerReady({ player }: { player: string }) {
     if (this.#state.stage !== 'lobby') return;
 
     this.#shoutMsg({ type: 'playerReady', data: player });
@@ -146,7 +186,7 @@ export class ServerLobby {
     if (this.#state.remainingReady === 0) this.startGame();
   }
 
-  voteFor(thing: string, player: string) {
+  voteFor({ thing, player }: { thing: string; player: string }) {
     if (this.#state.stage !== 'game') return;
 
     this.#state.totalVotes = this.#state.votes.vote(thing, player);
@@ -202,7 +242,7 @@ export class ServerLobby {
 
     const winner = this.#tournament.handleMatchEnd([
       this.#state.votes.thingsTuple(),
-      this.#state.votes.votesTuple()
+      this.#state.votes.voteCount()
     ]);
 
     const round = this.#state.round;

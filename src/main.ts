@@ -1,8 +1,8 @@
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
-import App from './App.vue';
+import App from './client/App.vue';
 import { GameClient } from '@/game/client/GameClient.ts';
-import { router } from './router.ts';
+import { router } from '@/client/router.ts';
 import { useGameInternalStore } from '@/stores/internal.ts';
 
 const app = createApp(App);

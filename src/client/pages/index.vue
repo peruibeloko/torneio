@@ -63,14 +63,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useHomeStore } from '@/client/stores/home.ts';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { onEnter } from '@/client/composables/enter.ts';
 import { useGameStore } from '../stores/game';
 
 const router = useRouter();
-const home = useHomeStore();
 const game = useGameStore();
 const disableButtons = ref(false);
 

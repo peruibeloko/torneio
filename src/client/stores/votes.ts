@@ -24,27 +24,15 @@ export const useVoteStore = defineStore('votes', () => {
   }
 
   function vote(thing: string, player: string) {
-    const isVoteL = thing === thingL.value;
+    const isVoteForL = thing === thingL.value;
 
-    if (isVoteL && votesR.value.has(player)) {
+    if (isVoteForL) {
       votesR.value.delete(player);
       votesL.value.add(player);
-      return 0;
-    }
-
-    if (isVoteL) {
-      votesL.value.add(player);
-      return 1;
-    }
-
-    if (votesL.value.has(player)) {
+    } else {
       votesL.value.delete(player);
       votesR.value.add(player);
-      return 0;
     }
-
-    votesR.value.add(player);
-    return 1;
   }
 
   function reset() {

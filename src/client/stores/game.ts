@@ -24,6 +24,10 @@ export const useGameStore = defineStore('game', () => {
     internal.joinLobbyCallback = cb;
   }
 
+  function gameStartLogic(cb: () => void) {
+    internal.gameStartCallback = cb;
+  }
+
   function roundStartLogic(cb: () => void) {
     internal.roundStartCallback = cb;
   }
@@ -53,6 +57,23 @@ export const useGameStore = defineStore('game', () => {
     });
   }
 
+  function suggest(thing: string) {
+    internal.sendMsg({
+      type: 'suggest',
+      data: { thing, lobbyCode: internal.lobbyCode }
+    });
+  }
+
+  function ready() {
+    internal.sendMsg({
+      type: 'ready',
+      data: {
+        lobbyCode: internal.lobbyCode,
+        player: internal.playerName
+      }
+    });
+  }
+
   function vote(thing: string) {
     votes.vote(thing, internal.playerName);
     internal.sendMsg({
@@ -77,9 +98,12 @@ export const useGameStore = defineStore('game', () => {
     joinLobbyLogic,
     roundStartLogic,
     roundEndLogic,
+    gameStartLogic,
     createLobby,
     joinLobby,
     leaveLobby,
+    suggest,
+    ready,
     vote
   };
 });

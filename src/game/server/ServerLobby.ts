@@ -5,6 +5,7 @@ import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
 import { ClientMessage } from '@/game/client/ClientMessages.ts';
 import { EventBus } from '@/game/events/EventBus.ts';
+import { EventData, ServerEvent } from '@/game/events/ServerEvents.ts';
 
 export class ServerLobby {
   #lobbyCode: string; // telemetria
@@ -20,7 +21,7 @@ export class ServerLobby {
       remainingReady: 0
     };
 
-    const bus = EventBus.getInstance();
+    const bus = EventBus.getInstance<ServerEvent>();
 
     bus.subscribe('join', this.addPlayer);
     bus.subscribe('leave', this.removePlayer);
@@ -152,7 +153,7 @@ export class ServerLobby {
   removePlayer({ player }: { player: string }) {
     this.#players.delete(player);
     if (this.#players.size === 0) return;
-    
+
     this.#shoutMsg({ type: 'playerLeft', data: player });
 
     if (this.#state.stage === 'game') {
@@ -167,13 +168,13 @@ export class ServerLobby {
     return this.#players.size;
   }
 
-  suggestThing({ thing }: { thing: string }) {
+  suggestThing({ thing }: EventData<'suggest'>) {
     if (this.#state.stage !== 'lobby') return;
     this.#shoutMsg({ type: 'newSuggestion', data: thing });
     this.#state.things.add(thing);
   }
 
-  playerReady({ player }: { player: string }) {
+  playerReady({ player }: EventData<'ready'>) {
     if (this.#state.stage !== 'lobby') return;
 
     this.#shoutMsg({ type: 'playerReady', data: player });
@@ -187,7 +188,7 @@ export class ServerLobby {
     if (this.#state.remainingReady === 0) this.startGame();
   }
 
-  voteFor({ thing, player }: { thing: string; player: string }) {
+  voteFor({ thing, player }: EventData<'vote'>) {
     if (this.#state.stage !== 'game') return;
 
     this.#state.totalVotes = this.#state.votes.vote(thing, player);

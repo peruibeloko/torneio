@@ -22,7 +22,7 @@ type JoinLobbyEvt = { lobbyCode: string; player: string } & Socket;
 type LeaveLobbyEvt = { lobbyCode: string; player: string } & Socket;
 
 type SuggestThingEvt = { lobbyCode: string; thing: string } & Socket;
-type PlayerReadyEvt = { lobbyCode: string } & Socket;
+type PlayerReadyEvt = { lobbyCode: string; player: string } & Socket;
 
 type RoundStartEvt = { lobbyCode: string; things: ThingTuple };
 type VoteEvt = { lobbyCode: string; player: string; thing: string } & Socket;

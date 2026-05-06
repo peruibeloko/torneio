@@ -47,14 +47,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useLobbyStore } from '@/client/stores/lobby.ts';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { onEnter } from '@/client/composables/enter.ts';
 import { useGameStore } from '@/client/stores/game.ts';
 
 const game = useGameStore();
-const lobby = useLobbyStore();
 const router = useRouter();
 
 const suggestion = ref('');
@@ -64,16 +62,17 @@ const isReady = ref(false);
 const handleReady = () => {
   disabledInputs.value = true;
   isReady.value = true;
-  lobby.ready();
+  game.ready();
 };
 
 const suggest = () => {
-  lobby.suggest(suggestion.value);
+  game.suggest(suggestion.value);
   suggestion.value = '';
 };
+
 const suggestOnEnter = onEnter(suggest);
 
-lobby.setGameStartLogic(() => {
+game.gameStartLogic(() => {
   // TODO countdown
   router.push({ name: 'game' });
 });

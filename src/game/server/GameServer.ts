@@ -9,8 +9,10 @@ export class GameServer {
   #lobbies = new Map<string, ServerLobby>();
 
   constructor() {
-    EventBus.getInstance().subscribe('create', this.createLobby);
-    EventBus.getInstance().subscribe('join', this.joinLobby);
+    const bus = EventBus.getInstance<ServerEvent>();
+    
+    bus.subscribe('create', this.createLobby);
+    bus.subscribe('join', this.joinLobby);
   }
 
   getLobby(lobbyCode: string) {

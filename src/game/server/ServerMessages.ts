@@ -1,13 +1,16 @@
 import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
-import type { GameStages } from '@/game/shared/constants.ts';
+import type { GameInfo, GameStages } from '@/game/shared/constants.ts';
 
 export type ServerMessage =
+  | { type: 'createLobbyResponse'; data: string }
+  | { type: 'joinLobbyResponse'; data: GameInfo | null }
   | { type: 'allPlayers'; data: AllPlayersMsg }
   | { type: 'allVotes'; data: AllVotesMsg }
   | { type: 'allSuggestions'; data: AllSuggestionsMsg }
   | { type: 'playerJoined'; data: string }
   | { type: 'playerReady'; data: string }
   | { type: 'playerLeft'; data: string }
+  | { type: 'newLobby'; data: string }
   | { type: 'newVote'; data: VoteMsg }
   | { type: 'newSuggestion'; data: string }
   | { type: 'roundStart'; data: RoundStartMsg }

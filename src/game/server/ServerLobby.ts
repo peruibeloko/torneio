@@ -150,9 +150,10 @@ export class ServerLobby {
   }
 
   removePlayer({ player }: { player: string }) {
-    this.#shoutMsg({ type: 'playerLeft', data: player });
-
     this.#players.delete(player);
+    if (this.#players.size === 0) return;
+    
+    this.#shoutMsg({ type: 'playerLeft', data: player });
 
     if (this.#state.stage === 'game') {
       this.#state.totalVotes = this.#state.votes.removePlayer(player);

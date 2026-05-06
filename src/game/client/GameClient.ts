@@ -3,7 +3,7 @@ import type {
   ServerMessage
 } from '@/game/server/ServerMessages.ts';
 import type { ClientPlayer } from '@/game/shared/constants.ts';
-import { useGameInternalStore } from '@/stores/internal.ts';
+import { useGameInternalStore } from '@/client/stores/internal.ts';
 import { useVoteStore } from '@/client/stores/votes.ts';
 import { decode } from 'msgpack';
 
@@ -82,6 +82,14 @@ export class GameClient {
 
   #handleMsg(msg: ServerMessage) {
     switch (msg.type) {
+      case 'createLobbyResponse':
+        this.#game.createLobbyCallback(msg.data);
+        break;
+
+      case 'joinLobbyResponse':
+        this.#game.joinLobbyCallback(msg.data);
+        break;
+
       case 'allPlayers':
         this.#setPlayers(msg.data);
         break;

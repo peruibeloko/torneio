@@ -6,13 +6,6 @@ import type { GameInfo, GameStages } from '@/game/shared/constants.ts';
 export const useHomeStore = defineStore('home', () => {
   const internal = useGameInternalStore();
 
-  async function createLobby() {
-    const lobbyCode = await fetch('/api/createLobby', { method: 'POST' }).then(
-      r => r.text()
-    );
-    return lobbyCode;
-  }
-
   async function joinLobby(name: string, lobbyCode: string) {
     internal.lobbyCode = lobbyCode;
 
@@ -45,7 +38,6 @@ export const useHomeStore = defineStore('home', () => {
   }
 
   return {
-    createLobby,
     joinLobby
   };
 });

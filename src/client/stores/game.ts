@@ -1,7 +1,8 @@
-import { useGameInternalStore } from '@/stores/internal.ts';
+import { useGameInternalStore } from '@/client/stores/internal.ts';
+import { useVoteStore } from '@/client/stores/votes.ts';
+import { GameInfo } from '@/game/shared/constants.ts';
 import { defineStore } from 'pinia';
 import { computed } from 'vue';
-import { useVoteStore } from "@/client/stores/votes.ts";
 
 export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();
@@ -15,12 +16,34 @@ export const useGameStore = defineStore('game', () => {
   const winner = computed(() => internal.winner);
   const gameEnd = computed(() => internal.isGameEnd);
 
-  function setRoundStartLogic(cb: () => void) {
+  function createLobbyLogic(cb: (lobbyCode: string) => void) {
+    internal.createLobbyCallback = cb;
+  }
+
+  function joinLobbyLogic(cb: (info: GameInfo | null) => void) {
+    internal.joinLobbyCallback = cb;
+  }
+
+  function roundStartLogic(cb: () => void) {
     internal.roundStartCallback = cb;
   }
 
-  function setRoundEndLogic(cb: () => void) {
+  function roundEndLogic(cb: () => void) {
     internal.roundEndCallback = cb;
+  }
+
+  function createLobby() {
+    internal.sendMsg({
+      type: 'create',
+      data: null
+    });
+  }
+
+  function joinLobby(plainName: string, lobbyCode: string) {
+    internal.sendMsg({
+      type: 'join',
+      data: { lobbyCode, player: plainName }
+    });
   }
 
   function leaveLobby() {
@@ -50,8 +73,12 @@ export const useGameStore = defineStore('game', () => {
     round,
     winner,
     gameEnd,
-    roundStartLogic: setRoundStartLogic,
-    roundEndLogic: setRoundEndLogic,
+    createLobbyLogic,
+    joinLobbyLogic,
+    roundStartLogic,
+    roundEndLogic,
+    createLobby,
+    joinLobby,
     leaveLobby,
     vote
   };

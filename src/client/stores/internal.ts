@@ -1,6 +1,9 @@
-import type { ClientMessage } from "@/game/client/ClientMessages.ts";
-import type { ClientPlayer } from '@/game/shared/constants.ts';
-import { encode } from "msgpack";
+import type { ClientMessage } from '@/game/client/ClientMessages.ts';
+import type {
+  ClientPlayer,
+  GameInfo
+} from '@/game/shared/constants.ts';
+import { encode } from 'msgpack';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -16,6 +19,8 @@ export const useGameInternalStore = defineStore('gameInternal', () => {
   const winner = ref('');
   const isGameEnd = ref(false);
 
+  const createLobbyCallback = ref((_lobbyCode: string) => {});
+  const joinLobbyCallback = ref((_info: GameInfo | null) => {});
   const gameStartCallback = ref(() => {});
   const roundStartCallback = ref(() => {});
   const roundEndCallback = ref(() => {});
@@ -33,6 +38,8 @@ export const useGameInternalStore = defineStore('gameInternal', () => {
     round,
     winner,
     isGameEnd,
+    createLobbyCallback,
+    joinLobbyCallback,
     gameStartCallback,
     roundStartCallback,
     roundEndCallback,

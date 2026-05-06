@@ -1,50 +1,50 @@
-import { ClientMessage } from '@/game/client/ClientMessages.ts';
-import { ThingTuple } from '@/game/server/Votes.ts';
-
-export type GameEvent =
-  | ClientMessage
-  | { type: 'roundStart'; data: { things: ThingTuple } }
-  | { type: 'roundEnd'; data: { winner: string; roundEnd: boolean } };
-
-type EventType = GameEvent['type'];
-type EventData<T extends EventType> = { socket: WebSocket } & Extract<
-  GameEvent,
+type GenericEvent = { type: string; data: unknown };
+type EventType<E extends GenericEvent> = E['type'];
+type EventData<E extends GenericEvent, T extends EventType<E>> = Extract<
+  E,
   { type: T }
 >['data'];
 
-type BaseHandler<T extends EventType> = (data: EventData<T>) => void;
-type AnyHandler = { [T in EventType]: BaseHandler<T> }[EventType];
-type Handler<T extends EventType> = Extract<AnyHandler, BaseHandler<T>>;
+type BaseHandler<E extends GenericEvent, T extends EventType<E>> = (
+  data: EventData<E, T>
+) => void;
+type AnyHandler<E extends GenericEvent> = {
+  [T in EventType<E>]: BaseHandler<E, T>;
+}[EventType<E>];
+type Handler<E extends GenericEvent, T extends EventType<E>> = Extract<
+  AnyHandler<E>,
+  BaseHandler<E, T>
+>;
 
-export class EventBus {
-  static #instance: EventBus;
-  #topics = new Map<EventType, Handler<EventType>[]>();
-
+export class EventBus<E extends GenericEvent> {
+  static #instance: unknown;
+  #topics = new Map<EventType<E>, Handler<E, EventType<E>>[]>();
+  
   private constructor() {}
 
-  static getInstance() {
+  static getInstance<T extends GenericEvent>() {
     if (!EventBus.#instance) EventBus.#instance = new EventBus();
-    return EventBus.#instance;
+    return EventBus.#instance as EventBus<T>;
   }
 
-  unsubscribe<T extends EventType>(topic: T, handler: Handler<T>) {
+  unsubscribe<T extends EventType<E>>(topic: T, handler: Handler<E, T>) {
     const subscribers = this.#topics.get(topic);
     if (!subscribers || subscribers.length === 0) return;
 
-    const idx = subscribers.indexOf(handler as Handler<EventType>);
+    const idx = subscribers.indexOf(handler as Handler<E, T>);
     subscribers.splice(idx, 1);
     this.#topics.set(topic, subscribers);
   }
 
-  subscribe<T extends EventType>(topic: T, handler: BaseHandler<T>) {
+  subscribe<T extends EventType<E>>(topic: T, handler: BaseHandler<E, T>) {
     const subscribers = this.#topics.getOrInsert(topic, []);
-    subscribers.push(handler as Handler<EventType>);
+    subscribers.push(handler as Handler<E, T>);
     this.#topics.set(topic, subscribers);
   }
 
-  publish<T extends EventType>(type: T, data: EventData<T>) {
+  publish<T extends EventType<E>>(type: T, data: EventData<E, T>) {
     const subscribers = this.#topics.get(type);
     if (!subscribers || subscribers.length === 0) return;
-    for (const handler of subscribers as Handler<T>[]) handler(data);
+    for (const handler of subscribers as Handler<E, T>[]) handler(data);
   }
 }

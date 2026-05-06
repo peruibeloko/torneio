@@ -26,5 +26,5 @@ export type GameStages = GameState['stage'];
 
 export interface GameInfo {
   uniqueName: string;
-  stage: GameStages;
+  stage: GameStages | null;
 }

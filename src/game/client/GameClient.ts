@@ -1,55 +1,131 @@
-import type {
-  AllVotesMsg,
-  ServerMessage
-} from '@/game/server/ServerMessages.ts';
-import type { ClientPlayer } from '@/game/shared/constants.ts';
-import { useGameInternalStore } from '@/stores/internal.ts';
-import { useVoteStore } from '@/stores/votes.ts';
-import { decode } from 'msgpack';
+import { useGameInternalStore } from '@/client/stores/internal.ts';
+import { useVoteStore } from '@/client/stores/votes.ts';
+import { ClientEventBus } from '@/game/client/ClientEventBus.ts';
+import { ClientMessage } from '@/game/client/ClientMessages.ts';
+import { ClientEvents } from '@/game/events/ClientEvents.ts';
+import { ManagedSocket } from '@/game/events/ManagedSocket.ts';
+import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 
 export class GameClient {
+  #socket: ManagedSocket<ServerMessage, ClientMessage>;
   #game = useGameInternalStore();
   #votes = useVoteStore();
 
-  constructor() {}
+  constructor() {
+    this.#socket = new ManagedSocket('/game', {
+      onMessage: this.#handleMsg,
+      onOpen: socket =>
+        console.info(
+          'connected successfully -- url is %s, status is %d',
+          socket.url,
+          socket.readyState
+        )
+    });
+    this.#game.client = this;
+    this.#setupEvents();
+  }
 
-  setup() {
-    this.#game.socket.addEventListener('message', e => {
-      (e.data as Blob)
-        .bytes()
-        .then(b => this.#handleMsg(decode(b) as ServerMessage));
+  #setupEvents() {
+    ClientEventBus.getBus().subscribe('createLobbyResponse', lobbyCode => {
+      this.#game.lobbyCode = lobbyCode;
+    });
+
+    ClientEventBus.getBus().subscribe('joinLobbyResponse', info => {
+      if (!info) return;
+      this.#game.playerName = info.uniqueName;
+    });
+
+    ClientEventBus.getBus().subscribe('allPlayers', players => {
+      this.#game.players = players;
+    });
+
+    ClientEventBus.getBus().subscribe('allVotes', this.#setVotes.bind(this));
+
+    ClientEventBus.getBus().subscribe('allSuggestions', things => {
+      this.#game.things = things;
+    });
+
+    ClientEventBus.getBus().subscribe('playerJoined', name =>
+      this.#game.players.push({ name, ready: false })
+    );
+
+    ClientEventBus.getBus().subscribe('playerReady', this.#playerReady.bind(this));
+
+    ClientEventBus.getBus().subscribe('playerLeft', this.#playerLeft.bind(this));
+
+    ClientEventBus.getBus().subscribe('newVote', ({ player, thing }) =>
+      this.#votes.vote(thing, player)
+    );
+
+    ClientEventBus.getBus().subscribe('newSuggestion', thing =>
+      this.#game.things.unshift(thing)
+    );
+
+    ClientEventBus.getBus().subscribe('roundStart', this.#startRound.bind(this));
+
+    ClientEventBus.getBus().subscribe('roundEnd', this.#endRound.bind(this));
+  }
+
+  createLobby() {
+    this.#socket.send({
+      type: 'create',
+      data: null
     });
   }
 
-  #updateInfo(uniqueName: string) {
-    this.#game.playerName = uniqueName;
+  joinLobby(plainName: string, lobbyCode: string) {
+    this.#socket.send({
+      type: 'join',
+      data: { lobbyCode, player: plainName }
+    });
   }
 
-  #startGame() {
-    this.#game.gameStartCallback();
+  leaveLobby() {
+    this.#socket.send({
+      type: 'leave',
+      data: { lobbyCode: this.#game.lobbyCode, player: this.#game.playerName }
+    });
   }
 
-  #startRound(things: [string, string], round: number) {
+  suggest(thing: string) {
+    this.#socket.send({
+      type: 'suggest',
+      data: { thing, lobbyCode: this.#game.lobbyCode }
+    });
+  }
+
+  ready() {
+    this.#socket.send({
+      type: 'ready',
+      data: {
+        lobbyCode: this.#game.lobbyCode,
+        player: this.#game.playerName
+      }
+    });
+  }
+
+  vote(thing: string) {
+    this.#votes.vote(thing, this.#game.playerName);
+    this.#socket.send({
+      type: 'vote',
+      data: {
+        player: this.#game.playerName,
+        thing,
+        lobbyCode: this.#game.lobbyCode
+      }
+    });
+  }
+
+  #startRound({ things, round }: ClientEvents['roundStart']) {
     this.#game.round = round;
 
     this.#votes.reset();
     this.#votes.setThings(things);
-
-    this.#game.roundStartCallback();
   }
 
-  #endRound(winner: string, gameEnd: boolean) {
+  #endRound({ winner, gameEnd }: ClientEvents['roundEnd']) {
     this.#game.winner = winner;
     this.#game.isGameEnd = gameEnd;
-    this.#game.roundEndCallback();
-  }
-
-  #newSuggestion(thing: string) {
-    this.#game.things.unshift(thing);
-  }
-
-  #newPlayer(name: string) {
-    this.#game.players.push({ name, ready: false });
   }
 
   #playerReady(name: string) {
@@ -63,72 +139,16 @@ export class GameClient {
     this.#votes.removePlayer(name);
   }
 
-  #newVote(player: string, thing: string) {
-    this.#votes.vote(thing, player);
-  }
-
-  #setSuggestions(things: string[]) {
-    this.#game.things = things;
-  }
-
-  #setPlayers(players: ClientPlayer[]) {
-    this.#game.players = players;
-  }
-
-  #setVotes({ things, votes }: AllVotesMsg) {
+  #setVotes({ things, votes }: ClientEvents['allVotes']) {
     this.#votes.setThings(things);
     this.#votes.setVotes(votes);
   }
 
   #handleMsg(msg: ServerMessage) {
-    switch (msg.type) {
-      case 'allPlayers':
-        this.#setPlayers(msg.data);
-        break;
-
-      case 'allVotes':
-        this.#setVotes(msg.data);
-        break;
-
-      case 'allSuggestions':
-        this.#setSuggestions(msg.data);
-        break;
-
-      case 'playerJoined':
-        this.#newPlayer(msg.data);
-        break;
-
-      case 'playerReady':
-        this.#playerReady(msg.data);
-        break;
-
-      case 'playerLeft':
-        this.#playerLeft(msg.data);
-        break;
-
-      case 'newVote':
-        this.#newVote(msg.data.player, msg.data.thing);
-        break;
-
-      case 'newSuggestion':
-        this.#newSuggestion(msg.data);
-        break;
-
-      case 'gameStart':
-        this.#startGame();
-        break;
-
-      case 'gameInfo':
-        this.#updateInfo(msg.data.uniqueName);
-        break;
-
-      case 'roundStart':
-        this.#startRound(msg.data.things, msg.data.round);
-        break;
-
-      case 'roundEnd':
-        this.#endRound(msg.data.winner, msg.data.gameEnd);
-        break;
-    }
+    console.debug('[GameClient class] Got message', msg);
+    ClientEventBus.getBus().publish(
+      msg.type as keyof ClientEvents,
+      msg.data as ClientEvents[typeof msg.type]
+    );
   }
 }

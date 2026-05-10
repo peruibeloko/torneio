@@ -35,8 +35,9 @@
 </template>
 
 <script lang="ts" setup>
-import { useGameStore } from '@/stores/game';
-import { useVoteStore } from '@/stores/votes';
+import { useGameStore } from '@/client/stores/game';
+import { useVoteStore } from '@/client/stores/votes';
+import { ClientEventBus } from '@/game/client/ClientEventBus';
 import { ref, useTemplateRef } from 'vue';
 
 const game = useGameStore();
@@ -47,27 +48,27 @@ const disabledR = ref(false);
 
 const winnerModal = useTemplateRef('winnerModal');
 
-game.roundEndLogic(() => {
+ClientEventBus.getBus().subscribe('roundEnd', () => {
   winnerModal.value?.showModal();
 });
 
-game.roundStartLogic(() => {
+ClientEventBus.getBus().subscribe('roundStart', () => {
   winnerModal.value?.close();
   disabledL.value = false;
   disabledR.value = false;
 });
 
 const voteL = () => {
-  game.vote(votes.thingL);
+  game.client.vote(votes.thingL);
   disabledL.value = true;
   disabledR.value = false;
 };
 
 const voteR = () => {
-  game.vote(votes.thingR);
+  game.client.vote(votes.thingR);
   disabledL.value = false;
   disabledR.value = true;
 };
 </script>
 
-<style src="../assets/game.css" scoped></style>
+<style src="@/client/assets/game.css" scoped></style>

@@ -1,5 +1,5 @@
 export type ClientMessage =
-  | { type: 'create' }
+  | { type: 'create'; data: null }
   | { type: 'join'; data: JoinMsg }
   | { type: 'leave'; data: LeaveMsg }
   | { type: 'suggest'; data: SuggestMsg }

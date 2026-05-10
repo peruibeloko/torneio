@@ -13,7 +13,9 @@
     <section class="join">
       <div class="side">
         <h2 class="fancytext_small">Entrar em uma sala</h2>
-        <h3 class="fancytext_small errorText" v-show="joinError">Sala não encontrada!</h3>
+        <h3 class="fancytext_small errorText" v-show="joinError">
+          Sala não encontrada!
+        </h3>
         <div class="inputGroup">
           <input
             :disabled="disableButtons"
@@ -22,13 +24,13 @@
             v-model.trim="lobbyCode"
             maxlength="6"
             minlength="6"
-            @keydown="onEnter(joinLobby)"
+            @keydown="onEnter(joinLobbyHandler)"
             required
           />
           <button
             id="joinLobby"
             type="button"
-            @click="joinLobby"
+            @click="joinLobbyHandler"
             :disabled="disableButtons || !isCodeValid"
           >
             Entrar
@@ -40,7 +42,7 @@
         <h2 class="fancytext_small">Criar uma nova sala</h2>
         <button
           id="createLobby"
-          @click="createLobby"
+          @click="createLobbyHandler"
           :disabled="disableButtons || !isNameValid"
         >
           Criar
@@ -61,13 +63,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useHomeStore } from '@/stores/home.ts';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { onEnter } from '@/composables/enter.ts';
+import { onEnter } from '@/client/composables/enter.ts';
+import { useGameStore } from '../stores/game';
+import { ClientEventBus } from '@/game/client/ClientEventBus';
 
 const router = useRouter();
-const game = useHomeStore();
+const game = useGameStore();
 const disableButtons = ref(false);
 
 const playerName = ref('');
@@ -77,34 +80,35 @@ const joinError = ref(false);
 const isCodeValid = computed(() => /[a-z]{6}/i.test(lobbyCode.value));
 const isNameValid = computed(() => playerName.value.length > 0);
 
-const joinLobby = async () => {
+const joinLobbyHandler = async () => {
   joinError.value = false;
   if (!isCodeValid) return false;
   if (!isNameValid) return false;
-
   disableButtons.value = true;
-  const stage = await game.joinLobby(playerName.value, lobbyCode.value);
 
-  if (stage === null) {
+  game.client.joinLobby(playerName.value, lobbyCode.value);
+};
+
+const createLobbyHandler = async () => {
+  if (!isNameValid) return false;
+  disableButtons.value = true;
+  game.client.createLobby();
+};
+
+ClientEventBus.getBus().subscribe('createLobbyResponse', lobbyCode => {
+  game.client.joinLobby(playerName.value, lobbyCode);
+});
+
+ClientEventBus.getBus().subscribe('joinLobbyResponse', info => {
+  if (info === null) {
     disableButtons.value = false;
     joinError.value = true;
-    setTimeout(() => joinError.value = false, 3000)
+    setTimeout(() => (joinError.value = false), 3000);
     return;
   }
-
-  if (stage === 'lobby') return router.push({ name: 'lobby' });
-
+  if (info.stage === 'lobby') return router.push({ name: 'lobby' });
   router.push({ name: 'game' });
-};
-
-const createLobby = async () => {
-  if (!isNameValid) return false;
-
-  disableButtons.value = true;
-  const lobbyCode = await game.createLobby();
-  await game.joinLobby(playerName.value, lobbyCode);
-  router.push({ name: 'lobby' });
-};
+});
 </script>
 
-<style src="../assets/home.css" scoped></style>
+<style src="@/client/assets/home.css" scoped></style>

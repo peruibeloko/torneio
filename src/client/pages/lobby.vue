@@ -17,7 +17,7 @@
         :disabled="disabledInputs || game.things.length < 2"
         class="ready"
       >
-        {{isReady ? 'Aguardando jogadores...':  'Começar partida' }}
+        {{ isReady ? 'Aguardando jogadores...' : 'Começar partida' }}
       </button>
     </section>
     <section class="things">
@@ -47,14 +47,13 @@
 </template>
 
 <script lang="ts" setup>
-import { useLobbyStore } from '@/stores/lobby.ts';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { onEnter } from '@/composables/enter.ts';
-import { useGameStore } from '@/stores/game.ts';
+import { onEnter } from '@/client/composables/enter.ts';
+import { useGameStore } from '@/client/stores/game.ts';
+import { ClientEventBus } from '@/game/client/ClientEventBus';
 
 const game = useGameStore();
-const lobby = useLobbyStore();
 const router = useRouter();
 
 const suggestion = ref('');
@@ -64,19 +63,20 @@ const isReady = ref(false);
 const handleReady = () => {
   disabledInputs.value = true;
   isReady.value = true;
-  lobby.ready();
+  game.client.ready();
 };
 
 const suggest = () => {
-  lobby.suggest(suggestion.value);
+  game.client.suggest(suggestion.value);
   suggestion.value = '';
 };
+
 const suggestOnEnter = onEnter(suggest);
 
-lobby.setGameStartLogic(() => {
+ClientEventBus.getBus().subscribe('gameStart', () => {
   // TODO countdown
   router.push({ name: 'game' });
 });
 </script>
 
-<style src="../assets/lobby.css" scoped></style>
+<style src="@/client/assets/lobby.css" scoped></style>

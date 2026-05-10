@@ -1,11 +1,27 @@
+import { ServerEventBus } from '@/game/client/ServerEventBus.ts';
+import { ServerEvents } from '@/game/events/ServerEvents.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
 import { Votes } from '@/game/server/Votes.ts';
-import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
 
+type ServerPlayer = {
+  ready: boolean;
+  socket: WebSocket;
+};
+
+export type GameState =
+  | { stage: 'lobby'; things: Set<string>; remainingReady: number }
+  | { stage: 'roundEnd'; round: number; winner: string; gameEnd: boolean }
+  | {
+      stage: 'game';
+      round: number;
+      totalVotes: number;
+      votes: Votes;
+    };
+
 export class ServerLobby {
-  #lobbyCode: string;
+  #lobbyCode: string; // telemetria
   #players = new Map<string, ServerPlayer>();
   #state: GameState;
   #tournament = new Tournament();
@@ -17,20 +33,64 @@ export class ServerLobby {
       things: new Set<string>(),
       remainingReady: 0
     };
-  }
 
-  #sendMsg(msg: ServerMessage, socket: WebSocket) {
-    console.log('sending message', msg);
-    socket.send(encode(msg));
-  }
-
-  #shoutMsg(msg: ServerMessage) {
-    console.log('shouting message', msg);
-    for (const { socket } of this.#players.values()) socket.send(encode(msg));
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'leave',
+      this.removePlayer.bind(this)
+    );
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'ready',
+      this.playerReady.bind(this)
+    );
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'suggest',
+      this.suggestThing.bind(this)
+    );
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'vote',
+      this.voteFor.bind(this)
+    );
   }
 
   get stage() {
     return this.#state.stage;
+  }
+
+  get size() {
+    return this.#players.size;
+  }
+
+  #sendMsg(msg: ServerMessage, socket: WebSocket) {
+    console.debug('[%s] Sending message %o', this.#lobbyCode, msg);
+    socket.send(encode(msg));
+  }
+
+  #shoutMsg(msg: ServerMessage) {
+    console.debug('[%s] Broadcasting message %o', this.#lobbyCode, msg);
+    for (const { socket } of this.#players.values()) socket.send(encode(msg));
+  }
+
+  static generateRoomCode() {
+    const randomIntBetween = (min: number, max: number) => {
+      const minCeiled = Math.ceil(min);
+      const maxFloored = Math.floor(max);
+      return Math.floor(
+        Math.random() * (maxFloored - minCeiled + 1) + minCeiled
+      );
+    };
+
+    // A - Z in ASCII
+    const getRandomChar = () => randomIntBetween(65, 90);
+
+    const codes = new Array(6)
+      .fill(0) // map doesnt work on empty arrays
+      .map(getRandomChar);
+
+    return String.fromCodePoint(...codes);
   }
 
   getUniqueName(name: string) {
@@ -48,14 +108,13 @@ export class ServerLobby {
     return uniqueName;
   }
 
-  addPlayer(name: string, player: ServerPlayer) {
-    this.#shoutMsg({
-      type: 'playerJoined',
-      data: name
-    });
+  addPlayer(player: string, socket: WebSocket) {
+    this.#shoutMsg({ type: 'playerJoined', data: player });
+    this.#players.set(player, { ready: false, socket });
+    this.#syncPlayer(socket);
+  }
 
-    this.#players.set(name, player);
-
+  #syncPlayer(socket: WebSocket) {
     switch (this.#state.stage) {
       case 'lobby':
         {
@@ -70,12 +129,15 @@ export class ServerLobby {
                 }))
                 .toArray()
             },
-            player.socket
+            socket
           );
 
           this.#sendMsg(
-            { type: 'allSuggestions', data: this.#state.things.values().toArray() },
-            player.socket
+            {
+              type: 'allSuggestions',
+              data: this.#state.things.values().toArray()
+            },
+            socket
           );
 
           this.#state.remainingReady++;
@@ -92,7 +154,7 @@ export class ServerLobby {
                 votes: this.#state.votes.votesTuple()
               }
             },
-            player.socket
+            socket
           );
         }
         break;
@@ -103,22 +165,20 @@ export class ServerLobby {
             type: 'roundEnd',
             data: { gameEnd: this.#state.gameEnd, winner: this.#state.winner }
           },
-          player.socket
+          socket
         );
       }
     }
   }
 
-  removePlayer(player: string) {
-    this.#shoutMsg({ type: 'playerLeft', data: player });
-
+  removePlayer({ player }: { player: string }) {
     this.#players.delete(player);
+    if (this.#players.size === 0) return;
+
+    this.#shoutMsg({ type: 'playerLeft', data: player });
 
     if (this.#state.stage === 'game') {
       this.#state.totalVotes = this.#state.votes.removePlayer(player);
-
-      console.log('total votes', this.#state.totalVotes);
-      console.log('total players', this.#players.size);
 
       if (this.#state.totalVotes === this.#players.size) this.endRound();
     }
@@ -126,13 +186,13 @@ export class ServerLobby {
     return this.#players.size;
   }
 
-  suggestThing(thing: string) {
+  suggestThing({ thing }: ServerEvents['suggest']) {
     if (this.#state.stage !== 'lobby') return;
     this.#shoutMsg({ type: 'newSuggestion', data: thing });
     this.#state.things.add(thing);
   }
 
-  playerReady(player: string) {
+  playerReady({ player }: ServerEvents['ready']) {
     if (this.#state.stage !== 'lobby') return;
 
     this.#shoutMsg({ type: 'playerReady', data: player });
@@ -146,8 +206,10 @@ export class ServerLobby {
     if (this.#state.remainingReady === 0) this.startGame();
   }
 
-  voteFor(thing: string, player: string) {
+  voteFor({ thing, player }: ServerEvents['vote']) {
     if (this.#state.stage !== 'game') return;
+
+    console.log('[%s] Player %s voted for %s', this.#lobbyCode, player, thing);
 
     this.#state.totalVotes = this.#state.votes.vote(thing, player);
 
@@ -156,17 +218,14 @@ export class ServerLobby {
       data: { player, thing }
     });
 
-    console.log('total votes', this.#state.totalVotes);
-    console.log('total players', this.#players.size);
-
     if (this.#state.totalVotes === this.#players.size) this.endRound();
   }
 
   startGame() {
     if (this.#state.stage !== 'lobby') return;
-    console.log('starting game');
+    console.log('[%s] Starting game', this.#lobbyCode);
     this.#tournament.setup(this.#state.things);
-    this.#shoutMsg({ type: 'gameStart' });
+    this.#shoutMsg({ type: 'gameStart', data: null });
     this.startRound();
   }
 
@@ -176,9 +235,8 @@ export class ServerLobby {
     const things = this.#tournament.getNextMatch();
 
     console.log(
-      'starting match',
+      '[%s] Starting round no. %d with %s',
       this.#tournament.currentRound,
-      'with',
       things
     );
 
@@ -202,15 +260,20 @@ export class ServerLobby {
 
     const winner = this.#tournament.handleMatchEnd([
       this.#state.votes.thingsTuple(),
-      this.#state.votes.votesTuple()
+      this.#state.votes.voteCount()
     ]);
 
     const round = this.#state.round;
     const gameEnd = this.#tournament.isTournamentDone;
     const winnerMsg = winner ?? 'Empate!';
 
-    console.log('match', round, 'ended, winner is', winner);
-    if (gameEnd) console.log('game end');
+    console.log(
+      '[%s] Round no. %d ended, winner is %s',
+      this.#lobbyCode,
+      round,
+      winner
+    );
+    if (gameEnd) console.log('[%s] Game end', this.#lobbyCode);
 
     this.#state = {
       stage: 'roundEnd',

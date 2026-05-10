@@ -1,3 +1,4 @@
+import { ThingTuple } from '@/game/server/Votes.ts';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -7,7 +8,7 @@ export const useVoteStore = defineStore('votes', () => {
   const votesL = ref(new Set<string>());
   const votesR = ref(new Set<string>());
 
-  function setThings([left, right]: [string, string]) {
+  function setThings([left, right]: ThingTuple) {
     thingL.value = left;
     thingR.value = right;
   }
@@ -23,27 +24,15 @@ export const useVoteStore = defineStore('votes', () => {
   }
 
   function vote(thing: string, player: string) {
-    const isVoteL = thing === thingL.value;
+    const isVoteForL = thing === thingL.value;
 
-    if (isVoteL && votesR.value.has(player)) {
+    if (isVoteForL) {
       votesR.value.delete(player);
       votesL.value.add(player);
-      return 0;
-    }
-
-    if (isVoteL) {
-      votesL.value.add(player);
-      return 1;
-    }
-
-    if (votesL.value.has(player)) {
+    } else {
       votesL.value.delete(player);
       votesR.value.add(player);
-      return 0;
     }
-
-    votesR.value.add(player);
-    return 1;
   }
 
   function reset() {

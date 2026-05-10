@@ -1,127 +1,85 @@
 import type { ClientMessage } from '@/game/client/ClientMessages.ts';
+import { ServerEventBus } from '@/game/client/ServerEventBus.ts';
+import { ServerEvents } from '@/game/events/ServerEvents.ts';
 import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
-import type { ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
 
-type Lobbies = Map<string, ServerLobby>;
-
 export class GameServer {
-  #lobbies: Lobbies = new Map();
+  #lobbies = new Map<string, ServerLobby>();
 
-  constructor() {}
+  constructor() {
+    ServerEventBus.getBus().subscribe('global', 'create', this.createLobby.bind(this));
+    ServerEventBus.getBus().subscribe('global', 'join', this.joinLobby.bind(this));
+  }
 
   getLobby(lobbyCode: string) {
-    return this.#lobbies.get(lobbyCode)!;
+    return this.#lobbies.get(lobbyCode) ?? null;
   }
 
-  lobbyExists(lobbyCode: string) {
-    return this.#lobbies.get(lobbyCode) !== undefined;
-  }
-
-  createLobby() {
-    const randomIntBetween = (min: number, max: number) => {
-      const minCeiled = Math.ceil(min);
-      const maxFloored = Math.floor(max);
-      return Math.floor(
-        Math.random() * (maxFloored - minCeiled + 1) + minCeiled
-      );
-    };
-
-    const createRoomCode = () => {
-      // A - Z in ASCII
-      const getRandomChar = () => randomIntBetween(65, 90);
-
-      const codes = new Array(6)
-        .fill(0) // map doesnt work on empty arrays
-        .map(getRandomChar);
-
-      return String.fromCodePoint(...codes);
-    };
-
-    let lobbyCode = createRoomCode();
-
+  createLobby({ socket }: ServerEvents['create']) {
+    let lobbyCode = ServerLobby.generateRoomCode();
     while (this.#lobbies.has(lobbyCode)) {
-      lobbyCode = createRoomCode();
+      lobbyCode = ServerLobby.generateRoomCode();
     }
 
     this.#lobbies.set(lobbyCode, new ServerLobby(lobbyCode));
-    return lobbyCode;
+    this.sendMsg({ type: 'createLobbyResponse', data: lobbyCode }, socket);
   }
 
-  joinLobby(lobbyCode: string, playerName: string) {
-    const lobby = this.getLobby(lobbyCode);
-    const uniqueName = lobby.getUniqueName(playerName);
+  joinLobby({ lobbyCode, player, socket }: ServerEvents['join']) {
+    const lobby = this.getLobby(lobbyCode.toUpperCase());
+    
+    if (lobby === null) {
+      this.sendMsg({ type: 'joinLobbyResponse', data: null }, socket);
+      return;
+    }
+    
+    const uniqueName = lobby.getUniqueName(player);
+    lobby.addPlayer(uniqueName, socket);
+    console.log('[%s] Player %s joined', lobbyCode, uniqueName);
 
-    return {
-      uniqueName,
-      stage: lobby.stage
-    };
-  }
-
-  addPlayer(lobbyCode: string, name: string, player: ServerPlayer) {
-    player.socket.addEventListener('close', () => {
-      this.removePlayer(lobbyCode, name);
+    socket.addEventListener('close', () => {
+      ServerEventBus.getBus().publish(['global', lobbyCode], 'leave', {
+        lobbyCode,
+        player: uniqueName,
+        socket
+      });
     });
 
-    this.getLobby(lobbyCode).addPlayer(name, player);
+    this.sendMsg(
+      {
+        type: 'joinLobbyResponse',
+        data: {
+          stage: lobby.stage,
+          uniqueName: uniqueName
+        }
+      },
+      socket
+    );
   }
 
-  removePlayer(lobbyCode: string, player: string) {
-    const remainingPlayers = this.getLobby(lobbyCode).removePlayer(player);
-    if (remainingPlayers !== 0) return;
-    this.#lobbies.delete(lobbyCode);
-  }
-
-  suggestThing(lobbyCode: string, thing: string) {
-    this.getLobby(lobbyCode).suggestThing(thing);
-  }
-
-  playerReady(lobbyCode: string, player: string) {
-    this.getLobby(lobbyCode).playerReady(player);
-  }
-
-  voteFor(lobbyCode: string, thing: string, player: string) {
-    this.getLobby(lobbyCode).voteFor(thing, player);
+  playerLeft({ lobbyCode }: ServerEvents['leave']) {
+    const lobby = this.getLobby(lobbyCode);
+    if (lobby && lobby.size === 0) {
+      this.#lobbies.delete(lobbyCode);
+    }
   }
 
   sendMsg(msg: ServerMessage, socket: WebSocket) {
+    console.debug('[GameServer class] Sending message %o', msg);
     socket.send(encode(msg));
   }
 
   handleMsg(msg: ClientMessage, socket: WebSocket) {
-    switch (msg.type) {
-      case 'create':
-        this.createLobby();
-        break;
-
-      case 'join':
-        this.addPlayer(msg.data.lobbyCode, msg.data.player, {
-          socket,
-          ready: false
-        });
-        break;
-
-      case 'ready':
-        this.playerReady(msg.data.lobbyCode, msg.data.player);
-        break;
-
-      case 'suggest':
-        this.suggestThing(msg.data.lobbyCode, msg.data.thing);
-        break;
-
-      case 'vote':
-        this.voteFor(msg.data.lobbyCode, msg.data.thing, msg.data.player);
-        break;
-
-      case 'leave':
-        this.removePlayer(msg.data.lobbyCode, msg.data.player);
-        break;
-
-      default:
-        console.error('Unsupported message:', msg);
-        msg;
-        break;
-    }
+    console.debug('[GameServer class] Got message', msg);
+    ServerEventBus.getBus().publish(
+      ['global', msg.data?.lobbyCode ?? ''],
+      msg.type,
+      {
+        socket,
+        ...msg.data
+      }
+    );
   }
 }

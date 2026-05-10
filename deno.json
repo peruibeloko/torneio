@@ -2,9 +2,14 @@
   "nodeModulesDir": "manual",
   "tasks": {
     "check": "deno fmt --check . && deno lint . && deno check",
+    
     "dev": "deno task dev:api && deno task dev:vite",
-    "dev:api": "wt deno serve --allow-env --allow-net ./src/server.ts",
+    "dev:api": "wt deno serve --watch --allow-net ./src/server.ts",
     "dev:vite": "wt deno run -A npm:vite",
+    
+    "debug": "deno task debug:api && deno task dev:vite",
+    "debug:api": "wt deno serve --inspect --allow-net ./src/server.ts",
+    
     "build": "vite build",
     "server:start": "deno serve -A --watch ./src/server.ts",
     "serve": "deno run build && deno run server:start",

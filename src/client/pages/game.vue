@@ -47,27 +47,27 @@ const disabledR = ref(false);
 
 const winnerModal = useTemplateRef('winnerModal');
 
-game.roundEndLogic(() => {
+game.client.subscribe('roundEnd', () => {
   winnerModal.value?.showModal();
 });
 
-game.roundStartLogic(() => {
+game.client.subscribe('roundStart', () => {
   winnerModal.value?.close();
   disabledL.value = false;
   disabledR.value = false;
 });
 
 const voteL = () => {
-  game.vote(votes.thingL);
+  game.client.vote(votes.thingL);
   disabledL.value = true;
   disabledR.value = false;
 };
 
 const voteR = () => {
-  game.vote(votes.thingR);
+  game.client.vote(votes.thingR);
   disabledL.value = false;
   disabledR.value = true;
 };
 </script>
 
-<style src="../assets/game.css" scoped></style>
+<style src="@/client/assets/game.css" scoped></style>

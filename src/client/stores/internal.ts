@@ -1,14 +1,11 @@
-import type { ClientMessage } from '@/game/client/ClientMessages.ts';
-import type {
-  ClientPlayer,
-  GameInfo
-} from '@/game/shared/constants.ts';
-import { encode } from 'msgpack';
+import { GameClient } from '@/game/client/GameClient.ts';
+import type { ClientPlayer } from '@/game/shared/constants.ts';
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { markRaw, ref } from 'vue';
 
 export const useGameInternalStore = defineStore('gameInternal', () => {
-  const socket = ref({} as WebSocket);
+  const client = markRaw(new GameClient());
+
   const playerName = ref('');
   const lobbyCode = ref('');
 
@@ -19,30 +16,14 @@ export const useGameInternalStore = defineStore('gameInternal', () => {
   const winner = ref('');
   const isGameEnd = ref(false);
 
-  const createLobbyCallback = ref((_lobbyCode: string) => {});
-  const joinLobbyCallback = ref((_info: GameInfo | null) => {});
-  const gameStartCallback = ref(() => {});
-  const roundStartCallback = ref(() => {});
-  const roundEndCallback = ref(() => {});
-
-  function sendMsg(msg: ClientMessage) {
-    socket.value.send(encode(msg));
-  }
-
   return {
-    socket,
+    client,
     playerName,
     lobbyCode,
     players,
     things,
     round,
     winner,
-    isGameEnd,
-    createLobbyCallback,
-    joinLobbyCallback,
-    gameStartCallback,
-    roundStartCallback,
-    roundEndCallback,
-    sendMsg
+    isGameEnd
   };
 });

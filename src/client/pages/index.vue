@@ -85,29 +85,29 @@ const joinLobbyHandler = async () => {
   if (!isNameValid) return false;
   disableButtons.value = true;
 
-  game.joinLobby(playerName.value, lobbyCode.value);
+  game.client.joinLobby(playerName.value, lobbyCode.value);
 };
 
-game.joinLobbyLogic(info => {
+const createLobbyHandler = async () => {
+  if (!isNameValid) return false;
+  disableButtons.value = true;
+  game.client.createLobby();
+};
+
+game.client.subscribe('createLobbyResponse', lobbyCode => {
+  game.client.joinLobby(playerName.value, lobbyCode);
+});
+
+game.client.subscribe('joinLobbyResponse', info => {
   if (info === null) {
     disableButtons.value = false;
     joinError.value = true;
     setTimeout(() => (joinError.value = false), 3000);
     return;
   }
-
   if (info.stage === 'lobby') return router.push({ name: 'lobby' });
-
   router.push({ name: 'game' });
 });
-
-const createLobbyHandler = async () => {
-  if (!isNameValid) return false;
-  disableButtons.value = true;
-  game.createLobby();
-};
-
-game.createLobbyLogic(lobbyCode => game.joinLobby(playerName.value, lobbyCode));
 </script>
 
-<style src="../assets/home.css" scoped></style>
+<style src="@/client/assets/home.css" scoped></style>

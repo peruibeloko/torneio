@@ -17,7 +17,7 @@
         :disabled="disabledInputs || game.things.length < 2"
         class="ready"
       >
-        {{isReady ? 'Aguardando jogadores...':  'Começar partida' }}
+        {{ isReady ? 'Aguardando jogadores...' : 'Começar partida' }}
       </button>
     </section>
     <section class="things">
@@ -62,20 +62,20 @@ const isReady = ref(false);
 const handleReady = () => {
   disabledInputs.value = true;
   isReady.value = true;
-  game.ready();
+  game.client.ready();
 };
 
 const suggest = () => {
-  game.suggest(suggestion.value);
+  game.client.suggest(suggestion.value);
   suggestion.value = '';
 };
 
 const suggestOnEnter = onEnter(suggest);
 
-game.gameStartLogic(() => {
+game.client.subscribe('gameStart', () => {
   // TODO countdown
   router.push({ name: 'game' });
 });
 </script>
 
-<style src="../assets/lobby.css" scoped></style>
+<style src="@/client/assets/lobby.css" scoped></style>

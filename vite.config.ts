@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/game': {
         target: 'http://localhost:8000',
         changeOrigin: true,
         ws: true

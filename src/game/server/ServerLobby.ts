@@ -1,17 +1,18 @@
+import { EventBus } from '@/game/events/EventBus.ts';
+import { ServerEvents } from '@/game/events/ServerEvents.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
 import { Votes } from '@/game/server/Votes.ts';
 import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
-import { ClientMessage } from '@/game/client/ClientMessages.ts';
-import { EventBus } from '@/game/events/EventBus.ts';
-import { EventData, ServerEvent } from '@/game/events/ServerEvents.ts';
 
 export class ServerLobby {
   #lobbyCode: string; // telemetria
   #players = new Map<string, ServerPlayer>();
   #state: GameState;
   #tournament = new Tournament();
+
+  bus: EventBus<ServerEvents> = new EventBus(this);
 
   constructor(lobbyCode: string) {
     this.#lobbyCode = lobbyCode;
@@ -21,13 +22,11 @@ export class ServerLobby {
       remainingReady: 0
     };
 
-    const bus = EventBus.getInstance<ServerEvent>();
-
-    bus.subscribe('join', this.addPlayer);
-    bus.subscribe('leave', this.removePlayer);
-    bus.subscribe('ready', this.playerReady);
-    bus.subscribe('suggest', this.suggestThing);
-    bus.subscribe('vote', this.voteFor);
+    this.bus.subscribe('join', this.addPlayer);
+    this.bus.subscribe('leave', this.removePlayer);
+    this.bus.subscribe('ready', this.playerReady);
+    this.bus.subscribe('suggest', this.suggestThing);
+    this.bus.subscribe('vote', this.voteFor);
   }
 
   get stage() {
@@ -168,13 +167,13 @@ export class ServerLobby {
     return this.#players.size;
   }
 
-  suggestThing({ thing }: EventData<'suggest'>) {
+  suggestThing({ thing }: ServerEvents['suggest']) {
     if (this.#state.stage !== 'lobby') return;
     this.#shoutMsg({ type: 'newSuggestion', data: thing });
     this.#state.things.add(thing);
   }
 
-  playerReady({ player }: EventData<'ready'>) {
+  playerReady({ player }: ServerEvents['ready']) {
     if (this.#state.stage !== 'lobby') return;
 
     this.#shoutMsg({ type: 'playerReady', data: player });
@@ -188,7 +187,7 @@ export class ServerLobby {
     if (this.#state.remainingReady === 0) this.startGame();
   }
 
-  voteFor({ thing, player }: EventData<'vote'>) {
+  voteFor({ thing, player }: ServerEvents['vote']) {
     if (this.#state.stage !== 'game') return;
 
     this.#state.totalVotes = this.#state.votes.vote(thing, player);
@@ -208,7 +207,7 @@ export class ServerLobby {
     if (this.#state.stage !== 'lobby') return;
     console.log('starting game');
     this.#tournament.setup(this.#state.things);
-    this.#shoutMsg({ type: 'gameStart' });
+    this.#shoutMsg({ type: 'gameStart', data: null });
     this.startRound();
   }
 

@@ -3,35 +3,44 @@ import { EventBus } from '@/game/events/EventBus.ts';
 import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { encode } from 'msgpack';
-import { EventData, ServerEvent } from '@/game/events/ServerEvents.ts';
+import { EventType, ServerEvents } from '@/game/events/ServerEvents.ts';
 
 export class GameServer {
   #lobbies = new Map<string, ServerLobby>();
+  #globalBus: EventBus<ServerEvents>;
 
   constructor() {
-    const bus = EventBus.getInstance<ServerEvent>();
-    
-    bus.subscribe('create', this.createLobby);
-    bus.subscribe('join', this.joinLobby);
+    this.#globalBus = new EventBus(this);
+    this.#globalBus.subscribe('create', this.createLobby);
+    this.#globalBus.subscribe('join', this.joinLobby);
+    console.log('game server initialized', this);
+    console.log('Event Bus:', JSON.stringify(this.#globalBus));
   }
 
   getLobby(lobbyCode: string) {
     return this.#lobbies.get(lobbyCode) ?? null;
   }
 
-  createLobby({ socket }: EventData<'create'>) {
+  createLobby({ socket }: ServerEvents['create']) {
+    console.log('creating lobby', socket);
+
     let lobbyCode = ServerLobby.generateRoomCode();
     while (this.#lobbies.has(lobbyCode)) {
       lobbyCode = ServerLobby.generateRoomCode();
     }
 
     this.#lobbies.set(lobbyCode, new ServerLobby(lobbyCode));
+    console.log('lobbies', this.#lobbies);
     this.sendMsg({ type: 'createLobbyResponse', data: lobbyCode }, socket);
   }
 
-  joinLobby({ lobbyCode, player, socket }: EventData<'join'>) {
+  joinLobby({ lobbyCode, player, socket }: ServerEvents['join']) {
+    console.log('adding player to lobby', lobbyCode, player);
+
     const lobby = this.getLobby(lobbyCode.toUpperCase());
 
+    console.log('current lobbies', this.#lobbies);
+    console.log('found lobby', lobby);
     if (lobby === null) {
       this.sendMsg({ type: 'joinLobbyResponse', data: null }, socket);
       return;
@@ -39,13 +48,10 @@ export class GameServer {
 
     const uniqueName = lobby.getUniqueName(player);
 
-    socket.addEventListener('close', () =>
-      EventBus.getInstance<ServerEvent>().publish('leave', {
-        lobbyCode,
-        player,
-        socket
-      })
-    );
+    socket.addEventListener('close', () => {
+      this.#globalBus.publish('leave', { lobbyCode, player, socket });
+      lobby.bus.publish('leave', { lobbyCode, player, socket });
+    });
 
     this.sendMsg(
       {
@@ -59,7 +65,7 @@ export class GameServer {
     );
   }
 
-  playerLeft({ lobbyCode }: EventData<'leave'>) {
+  playerLeft({ lobbyCode }: ServerEvents['leave']) {
     const lobby = this.getLobby(lobbyCode);
     if (lobby && lobby.size === 0) {
       this.#lobbies.delete(lobbyCode);
@@ -67,22 +73,23 @@ export class GameServer {
   }
 
   sendMsg(msg: ServerMessage, socket: WebSocket) {
+    console.log('sending message', msg);
     socket.send(encode(msg));
   }
 
   handleMsg(msg: ClientMessage, socket: WebSocket) {
-    const bus = EventBus.getInstance<ServerEvent>();
-
-    if (msg.data.lobbyCode) {
-      bus.publish(`${msg.data.lobbyCode}_${msg.type}` as ServerEvent['type'], {
-        socket,
-        ...msg.data
-      });
-    } else {
-      bus.publish(msg.type as ServerEvent['type'], {
+    console.log('got message', msg);
+    if (msg.data?.lobbyCode) {
+      const lobby = this.getLobby(msg.data.lobbyCode);
+      if (!lobby) return;
+      lobby.bus.publish(msg.type as EventType, {
         socket,
         ...msg.data
       });
     }
+    this.#globalBus.publish(msg.type as EventType, {
+      socket,
+      ...msg.data
+    });
   }
 }

@@ -1,50 +1,73 @@
-type GenericEvent = { type: string; data: unknown };
-type EventType<E extends GenericEvent> = E['type'];
-type EventData<E extends GenericEvent, T extends EventType<E>> = Extract<
-  E,
-  { type: T }
->['data'];
+import { preview } from 'vite';
 
-type BaseHandler<E extends GenericEvent, T extends EventType<E>> = (
-  data: EventData<E, T>
-) => void;
-type AnyHandler<E extends GenericEvent> = {
-  [T in EventType<E>]: BaseHandler<E, T>;
-}[EventType<E>];
-type Handler<E extends GenericEvent, T extends EventType<E>> = Extract<
-  AnyHandler<E>,
-  BaseHandler<E, T>
->;
+type GenericEvent = { [type: string]: unknown };
+
+export type GenericHandlers<E extends GenericEvent> = {
+  [T in keyof E]: (data: E[T]) => void;
+};
+
+class Topic<E extends GenericEvent, T extends keyof E> {
+  #subscribers: GenericHandlers<E>[T][] = [];
+
+  constructor(...handlers: ((data: E[T]) => void)[]) {
+    this.#subscribers = handlers;
+  }
+
+  [Symbol.iterator]() {
+    return Iterator.from(this.#subscribers);
+  }
+
+  get size() {
+    return this.#subscribers.length;
+  }
+
+  addSubscriber(handler: (data: E[T]) => void) {
+    this.#subscribers.push(handler);
+  }
+
+  publish(data: E[T]) {
+    for (const handler of this.#subscribers) handler(data);
+  }
+
+  removeSubscriber(handler: (data: E[T]) => void) {
+    const idx = this.#subscribers.indexOf(handler);
+    this.#subscribers.splice(idx, 1);
+  }
+}
 
 export class EventBus<E extends GenericEvent> {
-  static #instance: unknown;
-  #topics = new Map<EventType<E>, Handler<E, EventType<E>>[]>();
-  
-  private constructor() {}
+  #context: ThisType<unknown>;
+  #topics = new Map();
 
-  static getInstance<T extends GenericEvent>() {
-    if (!EventBus.#instance) EventBus.#instance = new EventBus();
-    return EventBus.#instance as EventBus<T>;
+  #getTopic<T extends keyof E>(t: T) {
+    return this.#topics.get(t) as Topic<E, T>;
   }
 
-  unsubscribe<T extends EventType<E>>(topic: T, handler: Handler<E, T>) {
-    const subscribers = this.#topics.get(topic);
-    if (!subscribers || subscribers.length === 0) return;
-
-    const idx = subscribers.indexOf(handler as Handler<E, T>);
-    subscribers.splice(idx, 1);
-    this.#topics.set(topic, subscribers);
+  constructor(ctx: ThisType<unknown>) {
+    this.#context = ctx;
   }
 
-  subscribe<T extends EventType<E>>(topic: T, handler: BaseHandler<E, T>) {
-    const subscribers = this.#topics.getOrInsert(topic, []);
-    subscribers.push(handler as Handler<E, T>);
-    this.#topics.set(topic, subscribers);
+  unsubscribe<T extends keyof E>(topic: T, handler: GenericHandlers<E>[T]) {
+    if (!this.#topics.has(topic)) return;
+    const t = this.#getTopic(topic);
+    t.removeSubscriber(handler);
+    if (t.size === 0) this.#topics.delete(topic);
   }
 
-  publish<T extends EventType<E>>(type: T, data: EventData<E, T>) {
-    const subscribers = this.#topics.get(type);
-    if (!subscribers || subscribers.length === 0) return;
-    for (const handler of subscribers as Handler<E, T>[]) handler(data);
+  subscribe<T extends keyof E>(topic: T, handler: GenericHandlers<E>[T]) {
+    console.log('registering listener', topic, handler);
+    const boundHandler = handler.bind(this.#context);
+    if (!this.#topics.has(topic)) {
+      this.#topics.set(topic, new Topic(boundHandler));
+    } else {
+      this.#getTopic(topic).addSubscriber(boundHandler);
+    }
+  }
+
+  publish<T extends keyof E>(event: T, data: E[T]) {
+    console.log('firing event', event, data);
+    const topic = this.#getTopic(event);
+    if (!topic || topic.size === 0) return;
+    for (const handler of topic) handler(data);
   }
 }

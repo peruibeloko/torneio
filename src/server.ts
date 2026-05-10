@@ -12,7 +12,7 @@ app.get(
   upgradeWebSocket(() => ({
     onOpen(_, ws) {
       if (!ws.raw) return;
-      console.info('connected succesfully -- status is %d', ws.raw.readyState);
+      console.info('[server] New client connected succesfully, status is %d', ws.raw.readyState);
     },
     onMessage({ data }, socket) {
       if (!socket.raw) return;

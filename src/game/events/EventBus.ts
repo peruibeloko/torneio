@@ -69,7 +69,7 @@ export class EventBus<E extends GenericEvent> {
   }
 
   publish<T extends keyof E>(event: T, data: E[T]) {
-    console.debug('firing event %s with data %o', event, data);
+    console.debug('[EventBus] Firing event %s with data %o', event, data);
     const topic = this.#getTopic(event);
     if (!topic || topic.size === 0) return;
     for (const handler of topic) handler(data);

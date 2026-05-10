@@ -145,7 +145,7 @@ export class GameClient {
   }
 
   #handleMsg(msg: ServerMessage) {
-    console.debug('got message', msg);
+    console.debug('[GameClient class] Got message', msg);
     ClientEventBus.getBus().publish(
       msg.type as keyof ClientEvents,
       msg.data as ClientEvents[typeof msg.type]

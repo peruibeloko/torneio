@@ -67,12 +67,12 @@ export class GameServer {
   }
 
   sendMsg(msg: ServerMessage, socket: WebSocket) {
-    console.debug('Sending message %o', msg);
+    console.debug('[GameServer class] Sending message %o', msg);
     socket.send(encode(msg));
   }
 
   handleMsg(msg: ClientMessage, socket: WebSocket) {
-    console.debug('got message', msg);
+    console.debug('[GameServer class] Got message', msg);
     ServerEventBus.getBus().publish(
       ['global', msg.data?.lobbyCode ?? ''],
       msg.type,

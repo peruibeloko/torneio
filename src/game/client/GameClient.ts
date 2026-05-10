@@ -19,7 +19,7 @@ export class GameClient {
 
   constructor() {
     this.#socket = new WebSocket('/game');
-    this.#socket.addEventListener('open', e => {
+    this.#socket.addEventListener('open', () => {
       console.log(
         'connected successfully -- url is %s, status is %d',
         this.#socket.url,

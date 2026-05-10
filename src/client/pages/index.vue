@@ -67,6 +67,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { onEnter } from '@/client/composables/enter.ts';
 import { useGameStore } from '../stores/game';
+import { ClientEventBus } from '@/game/client/ClientEventBus';
 
 const router = useRouter();
 const game = useGameStore();
@@ -94,11 +95,11 @@ const createLobbyHandler = async () => {
   game.client.createLobby();
 };
 
-game.client.subscribe('createLobbyResponse', lobbyCode => {
+ClientEventBus.getBus().subscribe('createLobbyResponse', lobbyCode => {
   game.client.joinLobby(playerName.value, lobbyCode);
 });
 
-game.client.subscribe('joinLobbyResponse', info => {
+ClientEventBus.getBus().subscribe('joinLobbyResponse', info => {
   if (info === null) {
     disableButtons.value = false;
     joinError.value = true;

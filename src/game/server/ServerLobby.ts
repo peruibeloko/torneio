@@ -4,6 +4,7 @@ import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
 import { Votes } from '@/game/server/Votes.ts';
 import { encode } from 'msgpack';
+import { ServerEventBus } from '@/game/client/ServerEventBus.ts';
 
 type ServerPlayer = {
   ready: boolean;
@@ -26,8 +27,6 @@ export class ServerLobby {
   #state: GameState;
   #tournament = new Tournament();
 
-  bus: EventBus<ServerEvents> = new EventBus(this);
-
   constructor(lobbyCode: string) {
     this.#lobbyCode = lobbyCode;
     this.#state = {
@@ -36,10 +35,26 @@ export class ServerLobby {
       remainingReady: 0
     };
 
-    this.bus.subscribe('leave', this.removePlayer);
-    this.bus.subscribe('ready', this.playerReady);
-    this.bus.subscribe('suggest', this.suggestThing);
-    this.bus.subscribe('vote', this.voteFor);
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'leave',
+      this.removePlayer.bind(this)
+    );
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'ready',
+      this.playerReady.bind(this)
+    );
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'suggest',
+      this.suggestThing.bind(this)
+    );
+    ServerEventBus.getBus().subscribe(
+      lobbyCode,
+      'vote',
+      this.voteFor.bind(this)
+    );
   }
 
   get stage() {

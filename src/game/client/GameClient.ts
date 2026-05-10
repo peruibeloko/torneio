@@ -1,115 +1,101 @@
 import { useGameInternalStore } from '@/client/stores/internal.ts';
 import { useVoteStore } from '@/client/stores/votes.ts';
-import {
-  ClientEvents,
-  Handlers,
-  EventType
-} from '@/game/events/ClientEvents.ts';
-import { EventBus } from '@/game/events/EventBus.ts';
-import type { ServerMessage } from '@/game/server/ServerMessages.ts';
-import { decode, encode } from 'msgpack';
+import { ClientEventBus } from '@/game/client/ClientEventBus.ts';
 import { ClientMessage } from '@/game/client/ClientMessages.ts';
+import { ClientEvents } from '@/game/events/ClientEvents.ts';
+import { ManagedSocket } from '@/game/events/ManagedSocket.ts';
+import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 
 export class GameClient {
-  #socket: WebSocket;
+  #socket: ManagedSocket<ServerMessage, ClientMessage>;
   #game = useGameInternalStore();
   #votes = useVoteStore();
 
-  #bus: EventBus<ClientEvents> = new EventBus(this);
-
   constructor() {
-    this.#socket = new WebSocket('/game');
-    this.#socket.addEventListener('open', () => {
-      console.log(
-        'connected successfully -- url is %s, status is %d',
-        this.#socket.url,
-        this.#socket.readyState
-      );
+    this.#socket = new ManagedSocket('/game', {
+      onMessage: this.#handleMsg,
+      onOpen: socket =>
+        console.info(
+          'connected successfully -- url is %s, status is %d',
+          socket.url,
+          socket.readyState
+        )
     });
-    this.#socket.addEventListener('message', e => {
-      (e.data as Blob)
-        .bytes()
-        .then(b => this.#handleMsg(decode(b) as ServerMessage));
-    });
-
     this.#game.client = this;
+    this.#setupEvents();
+  }
 
-    this.#bus.subscribe('createLobbyResponse', lobbyCode => {
+  #setupEvents() {
+    ClientEventBus.getBus().subscribe('createLobbyResponse', lobbyCode => {
       this.#game.lobbyCode = lobbyCode;
     });
-    this.#bus.subscribe('joinLobbyResponse', info => {
+
+    ClientEventBus.getBus().subscribe('joinLobbyResponse', info => {
       if (!info) return;
       this.#game.playerName = info.uniqueName;
     });
 
-    this.#bus.subscribe('allPlayers', players => {
+    ClientEventBus.getBus().subscribe('allPlayers', players => {
       this.#game.players = players;
     });
-    this.#bus.subscribe('allVotes', this.#setVotes);
-    this.#bus.subscribe('allSuggestions', things => {
+
+    ClientEventBus.getBus().subscribe('allVotes', this.#setVotes.bind(this));
+
+    ClientEventBus.getBus().subscribe('allSuggestions', things => {
       this.#game.things = things;
     });
-    this.#bus.subscribe('playerJoined', name =>
+
+    ClientEventBus.getBus().subscribe('playerJoined', name =>
       this.#game.players.push({ name, ready: false })
     );
-    this.#bus.subscribe('playerReady', this.#playerReady);
-    this.#bus.subscribe('playerLeft', this.#playerLeft);
-    this.#bus.subscribe('newVote', ({ player, thing }) =>
+
+    ClientEventBus.getBus().subscribe('playerReady', this.#playerReady.bind(this));
+
+    ClientEventBus.getBus().subscribe('playerLeft', this.#playerLeft.bind(this));
+
+    ClientEventBus.getBus().subscribe('newVote', ({ player, thing }) =>
       this.#votes.vote(thing, player)
     );
-    this.#bus.subscribe('newSuggestion', thing =>
+
+    ClientEventBus.getBus().subscribe('newSuggestion', thing =>
       this.#game.things.unshift(thing)
     );
-    this.#bus.subscribe('roundStart', this.#startRound);
-    this.#bus.subscribe('roundEnd', this.#endRound);
-  }
 
-  subscribe<T extends EventType>(topic: T, handler: Handlers[T]) {
-    this.#bus.subscribe(topic, handler);
-  }
+    ClientEventBus.getBus().subscribe('roundStart', this.#startRound.bind(this));
 
-  unsubscribe<T extends EventType>(topic: T, handler: Handlers[T]) {
-    this.#bus.unsubscribe(topic, handler);
-  }
-
-  publish<T extends EventType>(type: T, data: ClientEvents[T]) {
-    this.#bus.publish(type, data);
-  }
-
-  sendMsg(msg: ClientMessage) {
-    this.#socket.send(encode(msg));
+    ClientEventBus.getBus().subscribe('roundEnd', this.#endRound.bind(this));
   }
 
   createLobby() {
-    this.sendMsg({
+    this.#socket.send({
       type: 'create',
       data: null
     });
   }
 
   joinLobby(plainName: string, lobbyCode: string) {
-    this.sendMsg({
+    this.#socket.send({
       type: 'join',
       data: { lobbyCode, player: plainName }
     });
   }
 
   leaveLobby() {
-    this.sendMsg({
+    this.#socket.send({
       type: 'leave',
       data: { lobbyCode: this.#game.lobbyCode, player: this.#game.playerName }
     });
   }
 
   suggest(thing: string) {
-    this.sendMsg({
+    this.#socket.send({
       type: 'suggest',
       data: { thing, lobbyCode: this.#game.lobbyCode }
     });
   }
 
   ready() {
-    this.sendMsg({
+    this.#socket.send({
       type: 'ready',
       data: {
         lobbyCode: this.#game.lobbyCode,
@@ -120,7 +106,7 @@ export class GameClient {
 
   vote(thing: string) {
     this.#votes.vote(thing, this.#game.playerName);
-    this.sendMsg({
+    this.#socket.send({
       type: 'vote',
       data: {
         player: this.#game.playerName,
@@ -159,8 +145,8 @@ export class GameClient {
   }
 
   #handleMsg(msg: ServerMessage) {
-    console.log('got message', msg);
-    this.#bus.publish(
+    console.debug('got message', msg);
+    ClientEventBus.getBus().publish(
       msg.type as keyof ClientEvents,
       msg.data as ClientEvents[typeof msg.type]
     );

@@ -37,6 +37,7 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/client/stores/game';
 import { useVoteStore } from '@/client/stores/votes';
+import { ClientEventBus } from '@/game/client/ClientEventBus';
 import { ref, useTemplateRef } from 'vue';
 
 const game = useGameStore();
@@ -47,11 +48,11 @@ const disabledR = ref(false);
 
 const winnerModal = useTemplateRef('winnerModal');
 
-game.client.subscribe('roundEnd', () => {
+ClientEventBus.getBus().subscribe('roundEnd', () => {
   winnerModal.value?.showModal();
 });
 
-game.client.subscribe('roundStart', () => {
+ClientEventBus.getBus().subscribe('roundStart', () => {
   winnerModal.value?.close();
   disabledL.value = false;
   disabledR.value = false;

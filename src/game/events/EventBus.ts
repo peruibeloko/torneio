@@ -1,5 +1,3 @@
-import { preview } from 'vite';
-
 type GenericEvent = { [type: string]: unknown };
 
 export type GenericHandlers<E extends GenericEvent> = {
@@ -43,6 +41,13 @@ export class EventBus<E extends GenericEvent> {
     return this.#topics.get(t) as Topic<E, T>;
   }
 
+  /**
+   * How many topics we're managing
+   */
+  get size(){
+    return this.#topics.size;
+  }
+
   constructor(ctx: ThisType<unknown>) {
     this.#context = ctx;
   }
@@ -55,7 +60,6 @@ export class EventBus<E extends GenericEvent> {
   }
 
   subscribe<T extends keyof E>(topic: T, handler: GenericHandlers<E>[T]) {
-    console.log('registering listener', topic, handler);
     const boundHandler = handler.bind(this.#context);
     if (!this.#topics.has(topic)) {
       this.#topics.set(topic, new Topic(boundHandler));
@@ -65,7 +69,7 @@ export class EventBus<E extends GenericEvent> {
   }
 
   publish<T extends keyof E>(event: T, data: E[T]) {
-    console.log('firing event', event, data);
+    console.debug('firing event %s with data %o', event, data);
     const topic = this.#getTopic(event);
     if (!topic || topic.size === 0) return;
     for (const handler of topic) handler(data);

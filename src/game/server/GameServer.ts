@@ -1,20 +1,16 @@
 import type { ClientMessage } from '@/game/client/ClientMessages.ts';
-import { EventBus } from '@/game/events/EventBus.ts';
+import { ServerEventBus } from '@/game/client/ServerEventBus.ts';
+import { ServerEvents } from '@/game/events/ServerEvents.ts';
 import { ServerLobby } from '@/game/server/ServerLobby.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { encode } from 'msgpack';
-import { EventType, ServerEvents } from '@/game/events/ServerEvents.ts';
 
 export class GameServer {
   #lobbies = new Map<string, ServerLobby>();
-  #globalBus: EventBus<ServerEvents>;
 
   constructor() {
-    this.#globalBus = new EventBus(this);
-    this.#globalBus.subscribe('create', this.createLobby);
-    this.#globalBus.subscribe('join', this.joinLobby);
-    console.log('game server initialized', this);
-    console.log('Event Bus:', JSON.stringify(this.#globalBus));
+    ServerEventBus.getBus().subscribe('global', 'create', this.createLobby.bind(this));
+    ServerEventBus.getBus().subscribe('global', 'join', this.joinLobby.bind(this));
   }
 
   getLobby(lobbyCode: string) {
@@ -50,12 +46,11 @@ export class GameServer {
     lobby.addPlayer(uniqueName, socket);
 
     socket.addEventListener('close', () => {
-      this.#globalBus.publish('leave', {
+      ServerEventBus.getBus().publish(['global', lobbyCode], 'leave', {
         lobbyCode,
         player: uniqueName,
         socket
       });
-      lobby.bus.publish('leave', { lobbyCode, player: uniqueName, socket });
     });
 
     this.sendMsg(
@@ -83,18 +78,14 @@ export class GameServer {
   }
 
   handleMsg(msg: ClientMessage, socket: WebSocket) {
-    console.log('got message', msg);
-    if (msg.data?.lobbyCode) {
-      const lobby = this.getLobby(msg.data.lobbyCode);
-      if (!lobby) return;
-      lobby.bus.publish(msg.type as EventType, {
+    console.debug('got message', msg);
+    ServerEventBus.getBus().publish(
+      ['global', msg.data?.lobbyCode ?? ''],
+      msg.type,
+      {
         socket,
         ...msg.data
-      });
-    }
-    this.#globalBus.publish(msg.type as EventType, {
-      socket,
-      ...msg.data
-    });
+      }
+    );
   }
 }

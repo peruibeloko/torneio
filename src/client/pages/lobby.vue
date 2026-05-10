@@ -51,6 +51,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { onEnter } from '@/client/composables/enter.ts';
 import { useGameStore } from '@/client/stores/game.ts';
+import { ClientEventBus } from '@/game/client/ClientEventBus';
 
 const game = useGameStore();
 const router = useRouter();
@@ -72,7 +73,7 @@ const suggest = () => {
 
 const suggestOnEnter = onEnter(suggest);
 
-game.client.subscribe('gameStart', () => {
+ClientEventBus.getBus().subscribe('gameStart', () => {
   // TODO countdown
   router.push({ name: 'game' });
 });

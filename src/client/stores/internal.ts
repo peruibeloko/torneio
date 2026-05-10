@@ -1,7 +1,11 @@
 import { GameClient } from '@/game/client/GameClient.ts';
-import type { ClientPlayer } from '@/game/shared/constants.ts';
 import { defineStore } from 'pinia';
 import { markRaw, ref } from 'vue';
+
+interface ClientPlayer {
+  name: string;
+  ready: boolean;
+}
 
 export const useGameInternalStore = defineStore('gameInternal', () => {
   const client = markRaw(new GameClient());

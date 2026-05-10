@@ -6,7 +6,7 @@ export const useGameStore = defineStore('game', () => {
   const internal = useGameInternalStore();
 
   const playerName = computed(() => internal.playerName);
-
+  const lobbyCode = computed(() => internal.lobbyCode);
   const players = computed(() => internal.players);
   const things = computed(() => internal.things);
   const round = computed(() => internal.round);
@@ -14,7 +14,7 @@ export const useGameStore = defineStore('game', () => {
   const gameEnd = computed(() => internal.isGameEnd);
 
   return {
-    lobbyCode: internal.lobbyCode,
+    lobbyCode,
     playerName,
     players,
     things,

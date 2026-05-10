@@ -3,8 +3,22 @@ import { ServerEvents } from '@/game/events/ServerEvents.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
 import { Votes } from '@/game/server/Votes.ts';
-import type { GameState, ServerPlayer } from '@/game/shared/constants.ts';
 import { encode } from 'msgpack';
+
+type ServerPlayer = {
+  ready: boolean;
+  socket: WebSocket;
+};
+
+export type GameState =
+  | { stage: 'lobby'; things: Set<string>; remainingReady: number }
+  | { stage: 'roundEnd'; round: number; winner: string; gameEnd: boolean }
+  | {
+      stage: 'game';
+      round: number;
+      totalVotes: number;
+      votes: Votes;
+    };
 
 export class ServerLobby {
   #lobbyCode: string; // telemetria
@@ -22,7 +36,6 @@ export class ServerLobby {
       remainingReady: 0
     };
 
-    this.bus.subscribe('join', this.addPlayer);
     this.bus.subscribe('leave', this.removePlayer);
     this.bus.subscribe('ready', this.playerReady);
     this.bus.subscribe('suggest', this.suggestThing);
@@ -81,14 +94,9 @@ export class ServerLobby {
     return uniqueName;
   }
 
-  addPlayer({ player, socket }: { player: string; socket: WebSocket }) {
-    this.#shoutMsg({
-      type: 'playerJoined',
-      data: player
-    });
-
+  addPlayer(player: string, socket: WebSocket) {
+    this.#shoutMsg({ type: 'playerJoined', data: player });
     this.#players.set(player, { ready: false, socket });
-
     this.#syncPlayer(socket);
   }
 

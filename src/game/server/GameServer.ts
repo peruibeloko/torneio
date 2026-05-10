@@ -47,10 +47,15 @@ export class GameServer {
     }
 
     const uniqueName = lobby.getUniqueName(player);
+    lobby.addPlayer(uniqueName, socket);
 
     socket.addEventListener('close', () => {
-      this.#globalBus.publish('leave', { lobbyCode, player, socket });
-      lobby.bus.publish('leave', { lobbyCode, player, socket });
+      this.#globalBus.publish('leave', {
+        lobbyCode,
+        player: uniqueName,
+        socket
+      });
+      lobby.bus.publish('leave', { lobbyCode, player: uniqueName, socket });
     });
 
     this.sendMsg(

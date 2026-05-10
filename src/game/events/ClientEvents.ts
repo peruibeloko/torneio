@@ -1,6 +1,11 @@
-import { GameInfo, GameStages } from '@/game/shared/constants.ts';
-import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
 import { GenericHandlers } from '@/game/events/EventBus.ts';
+import { GameState } from '@/game/server/ServerLobby.ts';
+import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
+
+interface GameInfo {
+  uniqueName: string;
+  stage: GameState['stage'];
+}
 
 export type ClientEvents = {
   createLobbyResponse: LobbyCreatedEvt;
@@ -37,4 +42,4 @@ type VoteEvt = { player: string; thing: string };
 type SuggestionEvt = string;
 type RoundStartEvt = { things: ThingTuple; round: number };
 type RoundEndEvt = { winner: string; gameEnd: boolean };
-type GameInfoEvt = { stage: GameStages };
+type GameInfoEvt = { stage: GameState['stage'] };

@@ -34,10 +34,9 @@ export class GameClient {
 
     this.#game.client = this;
 
-    this.#bus.subscribe(
-      'createLobbyResponse',
-      lobbyCode => (this.#game.lobbyCode = lobbyCode)
-    );
+    this.#bus.subscribe('createLobbyResponse', lobbyCode => {
+      this.#game.lobbyCode = lobbyCode;
+    });
     this.#bus.subscribe('joinLobbyResponse', info => {
       if (!info) return;
       this.#game.playerName = info.uniqueName;

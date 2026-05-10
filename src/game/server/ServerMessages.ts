@@ -1,5 +1,5 @@
+import { GameState } from "@/game/server/ServerLobby.ts";
 import { ThingTuple, VotesTuple } from '@/game/server/Votes.ts';
-import type { GameStages } from '@/game/shared/constants.ts';
 
 export type ServerMessage =
   | { type: 'createLobbyResponse'; data: string }
@@ -25,7 +25,7 @@ export type AllPlayersMsg = {
 
 export type JoinLobbyResp = {
   uniqueName: string;
-  stage: GameStages;
+  stage: GameState['stage'];
 } | null;
 
 export type AllSuggestionsMsg = string[];
@@ -37,7 +37,7 @@ export type AllVotesMsg = {
 
 export type GameInfoMsg = {
   uniqueName: string;
-  stage: GameStages;
+  stage: GameState['stage'];
 };
 
 export type RoundStartMsg = {

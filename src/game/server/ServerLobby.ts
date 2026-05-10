@@ -1,10 +1,9 @@
-import { EventBus } from '@/game/events/EventBus.ts';
+import { ServerEventBus } from '@/game/client/ServerEventBus.ts';
 import { ServerEvents } from '@/game/events/ServerEvents.ts';
 import type { ServerMessage } from '@/game/server/ServerMessages.ts';
 import { Tournament } from '@/game/server/Tournament.ts';
 import { Votes } from '@/game/server/Votes.ts';
 import { encode } from 'msgpack';
-import { ServerEventBus } from '@/game/client/ServerEventBus.ts';
 
 type ServerPlayer = {
   ready: boolean;

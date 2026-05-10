@@ -66,12 +66,12 @@ export class ServerLobby {
   }
 
   #sendMsg(msg: ServerMessage, socket: WebSocket) {
-    console.log('sending message', msg);
+    console.debug('[%s] Sending message %o', this.#lobbyCode, msg);
     socket.send(encode(msg));
   }
 
   #shoutMsg(msg: ServerMessage) {
-    console.log('shouting message', msg);
+    console.debug('[%s] Broadcasting message %o', this.#lobbyCode, msg);
     for (const { socket } of this.#players.values()) socket.send(encode(msg));
   }
 
@@ -181,9 +181,6 @@ export class ServerLobby {
     if (this.#state.stage === 'game') {
       this.#state.totalVotes = this.#state.votes.removePlayer(player);
 
-      console.log('total votes', this.#state.totalVotes);
-      console.log('total players', this.#players.size);
-
       if (this.#state.totalVotes === this.#players.size) this.endRound();
     }
 
@@ -213,6 +210,8 @@ export class ServerLobby {
   voteFor({ thing, player }: ServerEvents['vote']) {
     if (this.#state.stage !== 'game') return;
 
+    console.log('[%s] Player %s voted for %s', this.#lobbyCode, player, thing);
+
     this.#state.totalVotes = this.#state.votes.vote(thing, player);
 
     this.#shoutMsg({
@@ -220,15 +219,12 @@ export class ServerLobby {
       data: { player, thing }
     });
 
-    console.log('total votes', this.#state.totalVotes);
-    console.log('total players', this.#players.size);
-
     if (this.#state.totalVotes === this.#players.size) this.endRound();
   }
 
   startGame() {
     if (this.#state.stage !== 'lobby') return;
-    console.log('starting game');
+    console.log('[%s] Starting game', this.#lobbyCode);
     this.#tournament.setup(this.#state.things);
     this.#shoutMsg({ type: 'gameStart', data: null });
     this.startRound();
@@ -240,9 +236,8 @@ export class ServerLobby {
     const things = this.#tournament.getNextMatch();
 
     console.log(
-      'starting match',
+      '[%s] Starting round no. %d with %s',
       this.#tournament.currentRound,
-      'with',
       things
     );
 
@@ -273,8 +268,13 @@ export class ServerLobby {
     const gameEnd = this.#tournament.isTournamentDone;
     const winnerMsg = winner ?? 'Empate!';
 
-    console.log('match', round, 'ended, winner is', winner);
-    if (gameEnd) console.log('game end');
+    console.log(
+      '[%s] Round no. %d ended, winner is %s',
+      this.#lobbyCode,
+      round,
+      winner
+    );
+    if (gameEnd) console.log('[%s] Game end', this.#lobbyCode);
 
     this.#state = {
       stage: 'roundEnd',

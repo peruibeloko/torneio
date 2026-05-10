@@ -18,32 +18,26 @@ export class GameServer {
   }
 
   createLobby({ socket }: ServerEvents['create']) {
-    console.log('creating lobby', socket);
-
     let lobbyCode = ServerLobby.generateRoomCode();
     while (this.#lobbies.has(lobbyCode)) {
       lobbyCode = ServerLobby.generateRoomCode();
     }
 
     this.#lobbies.set(lobbyCode, new ServerLobby(lobbyCode));
-    console.log('lobbies', this.#lobbies);
     this.sendMsg({ type: 'createLobbyResponse', data: lobbyCode }, socket);
   }
 
   joinLobby({ lobbyCode, player, socket }: ServerEvents['join']) {
-    console.log('adding player to lobby', lobbyCode, player);
-
     const lobby = this.getLobby(lobbyCode.toUpperCase());
-
-    console.log('current lobbies', this.#lobbies);
-    console.log('found lobby', lobby);
+    
     if (lobby === null) {
       this.sendMsg({ type: 'joinLobbyResponse', data: null }, socket);
       return;
     }
-
+    
     const uniqueName = lobby.getUniqueName(player);
     lobby.addPlayer(uniqueName, socket);
+    console.log('[%s] Player %s joined', lobbyCode, uniqueName);
 
     socket.addEventListener('close', () => {
       ServerEventBus.getBus().publish(['global', lobbyCode], 'leave', {
@@ -73,7 +67,7 @@ export class GameServer {
   }
 
   sendMsg(msg: ServerMessage, socket: WebSocket) {
-    console.log('sending message', msg);
+    console.debug('Sending message %o', msg);
     socket.send(encode(msg));
   }
 

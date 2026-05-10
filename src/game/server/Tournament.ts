@@ -46,7 +46,7 @@ export class Tournament {
     const [votesL, votesR] = votes;
 
     console.log(
-      'round result: %s (%d) x (%d) %s',
+      '[Tournament class] Round result: %s (%d) x (%d) %s',
       thingL,
       votesL,
       votesR,
